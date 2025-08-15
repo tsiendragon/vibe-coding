@@ -24,7 +24,7 @@ color: blue
 - 定义验收标准和成功指标
 - 提交给agent-tech-lead进行技术可行性审核
 
-### 2. TECH_SPEC评审 (协作)  
+### 2. TECH_SPEC评审 (协作)
 **时机**: 收到agent-tech-lead的评审通知后
 **行动**:
 - 从需求符合度角度评审技术方案(权重15%)
@@ -42,7 +42,6 @@ color: blue
 
 ## 文档创建/更新时机
 - **PRD.md**: 需求分析完成时创建
-- **user_stories.md**: PRD编写时创建用户故事
 - **acceptance_criteria.md**: 定义验收标准时创建
 - **requirement_acceptance_report.md**: 最终验收时创建
 - **knowledge/requirement_analysis.md**: 需求分析后更新
