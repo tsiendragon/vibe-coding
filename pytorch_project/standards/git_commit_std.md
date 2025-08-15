@@ -1,57 +1,63 @@
-# Commit Standards
+# Git 提交规范
 
-## Format
+## 格式
 ```
-<type>(<scope>): <subject>
+<类型>(<范围>): <简述>
 
-<body>
+<详细说明>
 
-<footer>
+<脚注>
 ```
 
-## Types
-- **feat**: New feature
-- **fix**: Bug fix
-- **docs**: Documentation changes
-- **style**: Formatting (no code change)
-- **refactor**: Code restructuring (no behavior change)
-- **perf**: Performance improvements
-- **test**: Adding/updating tests
-- **chore**: Maintenance tasks
+## 提交类型
+| 类型 | 用途 | 示例 |
+|------|------|------|
+| feat | 新功能 | `feat: 添加用户认证` |
+| fix | 修复缺陷 | `fix: 解决内存泄漏` |
+| docs | 文档更新 | `docs: 更新API文档` |
+| style | 代码格式(不影响功能) | `style: 格式化代码` |
+| refactor | 重构(不改变行为) | `refactor: 提取公共方法` |
+| perf | 性能优化 | `perf: 优化查询速度` |
+| test | 测试相关 | `test: 添加单元测试` |
+| chore | 构建/工具 | `chore: 更新依赖版本` |
 
-## Rules
-- **Subject**: Under 50 chars, imperative mood, no caps, no period
-- **Body**: Explain what and why, not how (optional)
-- **Footer**: Breaking changes or issue references (optional)
+## 规范要求
 
-## Examples
+### 必须 (MUST)
+- 简述 ≤50字符，使用祈使句
+- 一个提交 = 一个逻辑改动
+- 关联issue用 `Fixes #123`
 
-**Simple:**
+### 禁止 (MUST NOT)
+- 混合无关改动
+- 使用过去式("added" → "add")
+- 简述末尾加句号
+
+## 示例
+
+### 基础格式
 ```bash
-feat: add user authentication
-fix: resolve memory leak
-docs: update API guide
+feat(auth): 添加OAuth2支持
+fix(api): 处理空响应异常
+test(utils): 补充日期工具测试
 ```
 
-**With scope:**
+### 完整格式
 ```bash
-feat(auth): add OAuth2 support
-fix(api): handle null responses
-test(utils): add date helpers tests
-```
+fix(auth): 修复注册时的竞态条件
 
-**Full format:**
-```bash
-fix(auth): prevent race condition in signup
-
-Added mutex lock to ensure atomic email validation.
-Previous implementation allowed duplicate emails.
+通过互斥锁确保邮箱验证的原子性。
+之前的实现允许重复邮箱注册。
 
 Fixes #156
 ```
 
-## Best Practices
-- **One commit = one logical change**
-- **Write in imperative**: "add" not "added"
-- **Reference issues**: "Fixes #123"
-- **Keep atomic**: Don't mix unrelated changes
+## 快速决策
+```
+新功能? → feat
+修复bug? → fix  
+改进性能? → perf
+纯重构? → refactor
+仅文档? → docs
+仅测试? → test
+```

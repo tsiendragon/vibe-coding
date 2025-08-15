@@ -1,131 +1,157 @@
-# 🎯 **Pytest Testing Standards for AI Agents**
+# PyTest 测试规范
 
-This document is perfectly structured for an AI to consume and apply consistently. Here's why it works so well:
+## 核心规则
 
-## **1. Zero ambiguity**
-Every decision is pre-made:
-- Where do tests go? → Mirror `src/` structure
-- What to name them? → `test_<module>.py` or `test_<ClassName>.py`
-- How to name test functions? → `test_<target>_<behavior>[_<condition>]`
-- What coverage is needed? → ≥90% lines & branches
+### 必须 (MUST)
+- 为每个新模块创建测试文件
+- 每个公开函数至少包含1个正常路径 + 1个错误处理测试
+- 使用 `tmp_path` fixture 处理文件I/O测试
+- 测试覆盖率 ≥90% (行覆盖 + 分支覆盖)
 
-An AI agent won't have to "guess" or make subjective choices.
+### 禁止 (MUST NOT)  
+- 单元测试中使用 `time.sleep()`
+- 未标记 `@pytest.mark.integration` 进行网络调用
+- 测试间存在依赖关系
+- 使用无意义的测试名称
 
-## **2. Concrete examples for each pattern**
-The document shows exact code for:
-- Directory structure
-- Config setup
-- Fixture usage
-- Test naming
-- Each test layer (unit/integration/e2e)
+## 目录结构
 
-This gives the AI agent templates to pattern-match against.
+```
+src/x/y.py → tests/unit/x/test_y.py
+src/x/y.py → tests/integration/x/test_y.py  # 需要本地依赖
+src/x/y.py → tests/e2e/x/test_y.py          # 需要外部服务
+```
 
-## **3. Clear boundaries**
+## 命名规范
+
+### 文件命名
+- `test_<module>.py` 或 `test_<ClassName>.py`
+
+### 函数命名
+- `test_<目标>_<行为>[_<条件>]`
+- 示例: `test_parse_json_handles_empty_string`
+
+## 测试分层
+
+| 层级 | 用途 | 依赖 | 标记 |
+|------|------|------|------|
+| unit | 纯逻辑测试 | 无I/O、无网络 | 默认 |
+| integration | 本地集成 | 数据库、文件系统 | `@pytest.mark.integration` |
+| e2e | 端到端 | 真实外部服务 | `@pytest.mark.e2e` |
+
+### 层级选择决策树
+```
+纯逻辑测试? → unit/
+需要本地文件/DB? → integration/  
+需要外部API? → e2e/
+```
+
+## 测试模板
+
 ```python
-# Network forbidden in unit tests
-def guard(*a, **k): raise RuntimeError("Network disabled in unit tests")
-```
-This kind of hard rule prevents the AI from accidentally writing slow, flaky unit tests.
-
-## **4. Checklist-driven**
-Section 5's "What to test" gives the AI a literal checklist:
-- ✓ Inputs/outputs (types, ranges)
-- ✓ Edge cases
-- ✓ Error paths
-- ✓ Idempotency
-
-# 💡 **To make it even more AI-friendly**
-
-## **Add explicit "MUST/MUST NOT" rules**
-```markdown
-## AI Agent Rules
-- MUST create a test file for every new module
-- MUST include at least 1 happy path + 1 error case per public function
-- MUST NOT use time.sleep() in unit tests
-- MUST NOT make network calls without @pytest.mark.integration
-- MUST use tmp_path fixture for any file I/O tests
-```
-
-## **Add decision trees**
-```markdown
-## Choosing the right test layer
-Is it testing pure logic? → unit/
-Does it need local files/DB? → integration/
-Does it need external APIs? → e2e/
-```
-
-## **Add anti-patterns to avoid**
-```markdown
-## Never write tests like this:
-❌ def test_everything():  # Too broad
-❌ def test_1():  # Meaningless name
-❌ assert result  # No specific assertion
-❌ time.sleep(1)  # Real delays in unit tests
-```
-
-## **Add a "copy-paste" starter template**
-```python
-"""Template for AI to use when creating new test files"""
+"""模块测试文件"""
 import pytest
 from pathlib import Path
-from agent.module import TargetClass  # AI: update import
+from src.module import TargetClass  # 更新导入路径
 
-class TestTargetClass:  # AI: update class name
-    """Tests for TargetClass"""
-
-    def test_method_happy_path(self):
-        """Test normal successful operation"""
-        # AI: implement
-        pass
-
-    def test_method_handles_empty_input(self):
-        """Test edge case with empty input"""
-        with pytest.raises(ValueError):
-            # AI: implement
-            pass
+class TestTargetClass:
+    """TargetClass测试类"""
+    
+    def test_method_正常路径(self):
+        """测试正常操作成功"""
+        # Arrange: 准备测试数据
+        input_data = {...}
+        
+        # Act: 执行操作
+        result = TargetClass().method(input_data)
+        
+        # Assert: 验证结果
+        assert result.status == "success"
+        assert result.value == expected_value
+    
+    def test_method_处理空输入(self):
+        """测试空输入边界情况"""
+        with pytest.raises(ValueError, match="输入不能为空"):
+            TargetClass().method(None)
 ```
 
-# 🤖 **How an AI agent would use this**
+## 测试内容清单
 
-When asked to write tests, the agent would:
+### 每个函数必测
+- ✓ 正常输入输出
+- ✓ 边界条件 (空值、极值)
+- ✓ 错误路径 (异常处理)
+- ✓ 类型验证
 
-1. **Identify the module** → `src/agent/tools/git_tool.py`
-2. **Create mirror path** → `tests/unit/agent/tools/test_git_tool.py`
-3. **Apply naming convention** → `test_clone_repo_success`, `test_clone_repo_invalid_url`
-4. **Check the layer checklist** → "Does clone_repo need network?" → Yes → `integration/`
-5. **Use the config pattern** → Load from `integration.yaml`
-6. **Apply coverage requirement** → Ensure all public functions tested
+### 关键场景必测
+- ✓ 并发安全性
+- ✓ 幂等性
+- ✓ 资源清理
+- ✓ 超时处理
 
-# ✅ **Verdict**
+## 反模式示例
 
-This standard is **exceptionally well-suited** for AI consumption. It's:
-- **Deterministic** - no subjective decisions
-- **Complete** - covers structure, naming, config, fixtures, CI
-- **Enforceable** - includes automated checks
-- **Example-rich** - AI can pattern-match effectively
+```python
+# ❌ 错误示例
+def test_everything():  # 测试过于宽泛
+def test_1():          # 无意义命名
+assert result          # 断言不具体
+time.sleep(1)          # 单元测试中真实延迟
 
-The only enhancement I'd suggest is adding a single-page "cheat sheet" version that an AI can quickly reference:
-
-```markdown
-# Quick Reference for AI Agent
-
-## Structure
-src/x/y.py → tests/unit/x/test_y.py
-
-## Naming
-test_<function>_<what_it_does>_<condition>
-
-## Layers
-- unit: pure logic, no I/O
-- integration: local dependencies
-- e2e: real services
-
-## Every test needs
-- Arrange: setup
-- Act: call function
-- Assert: specific check
-
-## Coverage target
-≥90% or PR fails
+# ✅ 正确示例  
+def test_parse_config_invalid_yaml():  # 清晰的命名
+    with pytest.raises(ConfigError):   # 具体的断言
+        parse_config("invalid: [yaml")
 ```
+
+## 配置文件
+
+**pytest.ini**
+```ini
+[pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+markers =
+    integration: 需要本地依赖的测试
+    e2e: 需要外部服务的测试
+```
+
+**conftest.py**
+```python
+import pytest
+
+@pytest.fixture(autouse=True)
+def disable_network_in_unit_tests(monkeypatch, request):
+    """单元测试中禁用网络"""
+    if "integration" not in request.keywords and "e2e" not in request.keywords:
+        def guard(*args, **kwargs):
+            raise RuntimeError("单元测试中禁止网络调用")
+        monkeypatch.setattr("socket.socket", guard)
+```
+
+## CI集成
+
+```yaml
+# .github/workflows/test.yml
+- name: 运行测试
+  run: |
+    pytest tests/unit --cov=src --cov-report=term-missing
+    pytest tests/integration -m integration
+    pytest tests/e2e -m e2e --env=staging
+    
+- name: 检查覆盖率
+  run: |
+    coverage report --fail-under=90
+```
+
+## 快速参考
+
+| 场景 | 解决方案 |
+|------|----------|
+| 文件操作 | 使用 `tmp_path` fixture |
+| 时间相关 | 使用 `freezegun` 或 mock |
+| 外部API | 使用 `responses` 或 `vcr.py` |
+| 数据库 | 使用事务回滚或内存数据库 |
+| 异步代码 | 使用 `pytest-asyncio` |
