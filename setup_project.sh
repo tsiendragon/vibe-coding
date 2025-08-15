@@ -133,10 +133,9 @@ create_project_directory() {
     log_success "创建项目目录: $PROJECT_PATH"
 }
 
-# 初始化Git仓库
-init_git_repo() {
-    log_info "初始化Git仓库..."
-    git init
+# 创建.gitignore文件
+create_gitignore() {
+    log_info "创建.gitignore文件..."
     
     # 创建.gitignore
     cat > .gitignore << EOF
@@ -197,7 +196,7 @@ venv/
 .claude_session
 EOF
 
-    log_success "Git仓库初始化完成"
+    log_success ".gitignore文件创建完成"
 }
 
 # 复制核心文档和模板
@@ -205,39 +204,340 @@ copy_core_documents() {
     log_info "复制核心文档和模板..."
     
     # 创建目录结构
-    mkdir -p {docs,standards,knowledge/{best_practices,error_cases},documentation}
-    mkdir -p workflow/extract_rewrite
+    mkdir -p {docs/{workflows,standards,templates,knowledge/{best_practices,error_cases}}}
+    mkdir -p .claude/agents
     
-    # 复制工作流文档
+    # 复制工作流文档到 docs/workflows/
     if [[ -f "$SOURCE_REPO/pytorch_project/workflow/extract_rewrite/extract_rewrite_workflow.md" ]]; then
         cp "$SOURCE_REPO/pytorch_project/workflow/extract_rewrite/extract_rewrite_workflow.md" \
-           workflow/extract_rewrite/
-        log_success "复制工作流文档"
+           docs/workflows/
+        log_success "复制工作流文档到 docs/workflows/"
     fi
     
-    # 复制标准规范
+    # 复制标准规范到 docs/standards/
     if [[ -d "$SOURCE_REPO/pytorch_project/standards" ]]; then
-        cp -r "$SOURCE_REPO/pytorch_project/standards"/* standards/
-        log_success "复制标准规范"
+        cp -r "$SOURCE_REPO/pytorch_project/standards"/* docs/standards/
+        log_success "复制标准规范到 docs/standards/"
     fi
     
-    # 复制文档模板
+    # 复制文档模板到 docs/templates/
     if [[ -d "$SOURCE_REPO/pytorch_project/documentation" ]]; then
-        cp -r "$SOURCE_REPO/pytorch_project/documentation"/* documentation/
-        log_success "复制文档模板"
+        cp -r "$SOURCE_REPO/pytorch_project/documentation"/* docs/templates/
+        log_success "复制文档模板到 docs/templates/"
     fi
     
-    # 复制知识库模板
+    # 复制知识库模板到 docs/knowledge/
     if [[ -d "$SOURCE_REPO/pytorch_project/knowledge" ]]; then
-        cp -r "$SOURCE_REPO/pytorch_project/knowledge"/* knowledge/
-        log_success "复制知识库模板"
+        cp -r "$SOURCE_REPO/pytorch_project/knowledge"/* docs/knowledge/
+        log_success "复制知识库模板到 docs/knowledge/"
     fi
+    
+    # 创建 agent 配置文件
+    create_agent_configs
     
     # 复制CLAUDE.md配置文件
     if [[ -f "$SOURCE_REPO/CLAUDE.md" ]]; then
         cp "$SOURCE_REPO/CLAUDE.md" .
         log_success "复制CLAUDE.md配置文件"
     fi
+}
+
+# 创建Agent配置文件
+create_agent_configs() {
+    log_info "创建Agent配置文件..."
+    
+    # agent-product-manager
+    cat > .claude/agents/agent-product-manager.md << 'EOF'
+# Agent: Product Manager
+
+## 角色定义
+负责需求分析、PRD编写和功能验收的产品经理Agent
+
+## 核心职责
+- 需求分析和PRD编写
+- 功能验收和用户体验设计
+- 需求管理和优先级排序
+- 与需求方(human)反复讨论需求可行性
+
+## 主要文档
+- `docs/templates/PRD/prd_template.md` - PRD模板
+- `docs/PRD.md` - 项目需求文档
+- 需求验收报告
+
+## 知识领域
+- `docs/knowledge/best_practices/collaboration_patterns.md` - 协作模式
+- 需求分析方法和常见问题
+
+## 关键技能
+- 业务理解
+- 用户体验设计
+- 需求管理
+- 沟通协调
+
+## 工作流阶段
+- PRD起草到确定阶段：主责
+- 需求验收阶段：主责
+- TECH_SPEC评审：协作参与
+
+## 知识沉淀任务
+- 将需求分析的有效方法记录到知识库
+- 记录需求理解分歧的解决过程
+- 更新需求验收的最佳实践
+EOF
+
+    # agent-tech-lead
+    cat > .claude/agents/agent-tech-lead.md << 'EOF'
+# Agent: Technical Lead
+
+## 角色定义
+负责技术方案设计、架构决策和项目协调的技术负责人Agent
+
+## 核心职责
+- 技术方案设计和架构决策
+- 项目协调和团队领导
+- 最终交付决策
+- 冲突仲裁和资源协调
+
+## 主要文档
+- `docs/templates/TECH_SPEC/TECH_SPEC_template.md` - 技术规格模板
+- `docs/TECH_SPEC.md` - 技术设计文档
+- `docs/TODO.md` - 项目任务管理
+- `docs/prototype_review.md` - 原型评估报告
+
+## 知识领域
+- `docs/knowledge/best_practices/tech_solutions.md` - 技术方案
+- `docs/knowledge/best_practices/collaboration_patterns.md` - 协作模式
+
+## 关键技能
+- 系统架构
+- 技术选型
+- 团队领导
+- 决策管理
+
+## 工作流阶段
+- TECH_SPEC起草：主责
+- 原型开发协调：主责
+- 项目交付决策：主责
+- 冲突解决：仲裁者
+
+## 知识沉淀任务
+- 记录技术架构设计的最佳实践
+- 记录多Agent协作的有效模式
+- 记录项目交付决策的标准和流程
+EOF
+
+    # agent-researcher
+    cat > .claude/agents/agent-researcher.md << 'EOF'
+# Agent: Researcher
+
+## 角色定义
+负责论文调研、技术可行性分析和理论验证的研究员Agent
+
+## 核心职责
+- 论文调研和技术可行性分析
+- 理论一致性审核
+- 技术趋势分析
+- 学术资源调研和方法论指导
+
+## 主要文档
+- `docs/templates/research/literature_review_template.md` - 文献综述模板
+- `docs/research/literature_review.md` - 文献综述
+- `docs/research/feasibility_analysis.md` - 可行性分析
+- `docs/research/recommendations.md` - 技术建议
+
+## 知识领域
+- `docs/knowledge/best_practices/tech_solutions.md` - 技术方案库
+
+## 关键技能
+- 学术研究
+- 技术趋势分析
+- 理论验证
+- 文献调研
+
+## 工作流阶段
+- TECH_SPEC调研阶段：主责
+- 原型评估：理论验证
+- 理论一致性审核：主责
+
+## 知识沉淀任务
+- 记录有效的技术调研方法
+- 更新技术方案和理论洞察
+- 记录理论验证的关键检查点
+EOF
+
+    # agent-algorithm-engineer
+    cat > .claude/agents/agent-algorithm-engineer.md << 'EOF'
+# Agent: Algorithm Engineer
+
+## 角色定义
+负责算法实现、模型设计和核心开发的算法工程师Agent
+
+## 核心职责
+- 算法实现和模型设计
+- 核心开发和性能优化
+- 技术难题解决
+- 模块化开发和代码实现
+
+## 主要文档
+- `docs/templates/PROTOTYPE/PROTOTYPE_template.md` - 原型模板
+- `src/` - 源代码目录
+- 模块级README.md文件
+- 实验结果报告
+
+## 知识领域
+- `docs/knowledge/best_practices/code_patterns.md` - 代码模式
+- `docs/knowledge/error_cases/common_issues.md` - 常见问题
+
+## 遵循标准
+- `docs/standards/pycode_standards.md` - Python编码规范
+- `docs/standards/pytorch_standards.md` - PyTorch开发规范
+- `docs/standards/git_commit_std.md` - Git提交规范
+
+## 关键技能
+- 深度学习
+- PyTorch框架
+- 算法优化
+- 代码实现
+
+## 工作流阶段
+- 原型开发：主责
+- 完整代码实现：主责
+- 模块开发：主责
+
+## 知识沉淀任务
+- 记录算法实现的关键技巧
+- 记录验证实验设计方法
+- 记录bug修复的调试方法
+EOF
+
+    # agent-code-reviewer
+    cat > .claude/agents/agent-code-reviewer.md << 'EOF'
+# Agent: Code Reviewer
+
+## 角色定义
+负责代码质量审核、标准检查和持续监控的代码审查员Agent
+
+## 核心职责
+- 代码质量审核和标准检查
+- 持续监控和改进建议
+- 最佳实践推广
+- 代码健康度评估
+
+## 主要文档
+- 代码审核报告
+- 质量改进建议
+- 代码质量问题清单
+
+## 知识领域
+- `docs/knowledge/best_practices/code_patterns.md` - 代码模式库
+
+## 遵循标准
+- `docs/standards/pycode_standards.md` - Python编码规范
+- `docs/standards/pytorch_standards.md` - PyTorch开发规范
+- `docs/standards/pytest_stands.md` - 测试规范
+
+## 关键技能
+- 代码审查
+- 编程规范
+- PyTorch最佳实践
+- 质量保证
+
+## 工作流阶段
+- 代码开发全程：持续监控
+- 测试代码审查：质量把关
+- 最终代码审核：全面审查
+
+## 知识沉淀任务
+- 记录代码质量问题和改进建议
+- 更新代码审查的有效方法
+- 记录代码质量问题识别模式
+EOF
+
+    # agent-qa-engineer
+    cat > .claude/agents/agent-qa-engineer.md << 'EOF'
+# Agent: QA Engineer
+
+## 角色定义
+负责测试用例编写、质量保证和性能测试的质量保证工程师Agent
+
+## 核心职责
+- 测试用例编写和质量保证
+- 性能测试和集成测试
+- 质量验收和测试报告
+- 鲁棒性测试和稳定性验证
+
+## 主要文档
+- `tests/` - 测试代码目录
+- `tests/benchmark.md` - 性能测试报告
+- `tests/robustness_report.md` - 鲁棒性测试报告
+- `docs/final_quality_report.md` - 最终质量报告
+
+## 知识领域
+- `docs/knowledge/best_practices/test_strategies.md` - 测试策略
+- `docs/knowledge/error_cases/common_issues.md` - 常见问题
+
+## 遵循标准
+- `docs/standards/pytest_stands.md` - pytest测试规范
+- `docs/standards/git_commit_std.md` - Git提交规范
+
+## 关键技能
+- 软件测试
+- pytest规范
+- 性能分析
+- 质量保证
+
+## 工作流阶段
+- 模块测试：创建测试用例
+- 集成测试：端到端验证
+- 质量验收：最终质量把关
+
+## 知识沉淀任务
+- 记录测试设计方法和用例模式
+- 记录集成测试、性能测试策略
+- 记录质量验收的量化标准
+EOF
+
+    # agent-docs-writer
+    cat > .claude/agents/agent-docs-writer.md << 'EOF'
+# Agent: Documentation Writer
+
+## 角色定义
+负责技术文档、项目文档和文档体系构建的文档编写员Agent
+
+## 核心职责
+- 技术文档和项目文档编写
+- 文档体系构建
+- 知识整理和传承
+- 项目级文档集成
+
+## 主要文档
+- `README.md` - 项目主文档
+- `docs/` - 项目文档目录
+- `docs/templates/` - 文档模板
+
+## 知识领域
+- `docs/knowledge/best_practices/collaboration_patterns.md` - 协作模式
+
+## 遵循标准
+- `docs/standards/git_commit_std.md` - Git提交规范
+
+## 关键技能
+- 技术写作
+- 文档管理
+- 知识整理
+- 信息架构
+
+## 工作流阶段
+- 最终文档生成：主责
+- 文档体系构建：全程参与
+
+## 知识沉淀任务
+- 记录文档体系构建的最佳实践
+- 维护文档模板和规范
+- 整理项目知识和经验
+EOF
+
+    log_success "Agent配置文件创建完成"
 }
 
 # 根据项目类型定制配置
@@ -565,41 +865,48 @@ claude-code --version
 1. **需求分析阶段**
    \`\`\`bash
    # 创建PRD文档
-   cp documentation/PRD/prd_template.md docs/PRD.md
+   cp docs/templates/PRD/prd_template.md docs/PRD.md
    \`\`\`
 
 2. **技术设计阶段**  
    \`\`\`bash
    # 创建TECH_SPEC文档
-   cp documentation/TECH_SPEC/TECH_SPEC_template.md docs/TECH_SPEC.md
+   cp docs/templates/TECH_SPEC/TECH_SPEC_template.md docs/TECH_SPEC.md
    \`\`\`
 
 3. **原型开发阶段**
    \`\`\`bash
    # 创建原型文档
-   cp documentation/PROTOTYPE/PROTOTYPE_template.md docs/PROTOTYPE.md
+   cp docs/templates/PROTOTYPE/PROTOTYPE_template.md docs/PROTOTYPE.md
    \`\`\`
 
 ## 文档结构
 
 - \`docs/\`: 项目文档
-- \`documentation/\`: 文档模板
-- \`standards/\`: 代码规范和测试标准
-- \`knowledge/\`: 最佳实践和错误案例库
-- \`workflow/\`: AI协作工作流文档
+  - \`docs/templates/\`: 文档模板
+  - \`docs/standards/\`: 代码规范和测试标准
+  - \`docs/knowledge/\`: 最佳实践和错误案例库
+  - \`docs/workflows/\`: AI协作工作流文档
+- \`.claude/agents/\`: Agent配置文件
 
 ## 代码规范
 
-- Python代码: 遵循 \`standards/pycode_standards.md\`
-- 测试代码: 遵循 \`standards/pytest_stands.md\`
-- Git提交: 遵循 \`standards/git_commit_std.md\`
+- Python代码: 遵循 \`docs/standards/pycode_standards.md\`
+- 测试代码: 遵循 \`docs/standards/pytest_stands.md\`
+- Git提交: 遵循 \`docs/standards/git_commit_std.md\`
+
+## Agent协作
+
+- Agent配置: \`.claude/agents/\` 目录下的markdown文件
+- 工作流程: \`docs/workflows/extract_rewrite_workflow.md\`
 
 ## 贡献指南
 
-1. 阅读工作流文档: \`workflow/extract_rewrite/extract_rewrite_workflow.md\`
-2. 遵循Agent协作模式
-3. 及时进行知识沉淀
-4. 维护文档和测试
+1. 阅读工作流文档: \`docs/workflows/extract_rewrite_workflow.md\`
+2. 了解Agent角色: 查看 \`.claude/agents/\` 目录
+3. 遵循Agent协作模式
+4. 及时进行知识沉淀
+5. 维护文档和测试
 
 ## 许可证
 
@@ -631,25 +938,6 @@ install_dependencies() {
     fi
 }
 
-# 创建初始提交
-create_initial_commit() {
-    log_info "创建初始Git提交..."
-    
-    git add .
-    git commit -m "feat: initialize $PROJECT_TYPE project with Claude Code AI collaboration workflow
-
-- Add AI collaboration workflow documentation
-- Add coding standards and testing guidelines  
-- Add document templates for PRD, TECH_SPEC, PROTOTYPE
-- Add knowledge base templates for best practices
-- Configure project structure for $PROJECT_TYPE development
-
-🤖 Generated with Claude Code AI Collaboration Setup
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-
-    log_success "初始提交创建完成"
-}
 
 # 显示完成信息
 show_completion_info() {
@@ -666,16 +954,17 @@ show_completion_info() {
     fi
     
     echo "  3. 阅读 README.md 了解项目结构"
-    echo "  4. 阅读 workflow/extract_rewrite/extract_rewrite_workflow.md 了解AI协作流程"
-    echo "  5. 开始需求分析: cp documentation/PRD/prd_template.md docs/PRD.md"
+    echo "  4. 阅读 docs/workflows/extract_rewrite_workflow.md 了解AI协作流程"
+    echo "  5. 开始需求分析: cp docs/templates/PRD/prd_template.md docs/PRD.md"
     echo
     echo -e "${BLUE}重要文档:${NC}"
-    echo "  - 工作流程: workflow/extract_rewrite/extract_rewrite_workflow.md"
-    echo "  - 代码规范: standards/pycode_standards.md"
-    echo "  - 测试规范: standards/pytest_stands.md"
-    echo "  - Git规范: standards/git_commit_std.md"
-    echo "  - 文档模板: documentation/"
-    echo "  - 知识库: knowledge/"
+    echo "  - 工作流程: docs/workflows/extract_rewrite_workflow.md"
+    echo "  - 代码规范: docs/standards/pycode_standards.md"
+    echo "  - 测试规范: docs/standards/pytest_stands.md"
+    echo "  - Git规范: docs/standards/git_commit_std.md"
+    echo "  - 文档模板: docs/templates/"
+    echo "  - 知识库: docs/knowledge/"
+    echo "  - Agent配置: .claude/agents/"
     echo
     log_success "Happy coding with Claude Code AI! 🚀"
 }
@@ -706,12 +995,11 @@ EOF
     check_dependencies
     get_script_dir
     create_project_directory
-    init_git_repo
+    create_gitignore
     copy_core_documents
     customize_for_project_type
     create_project_readme
     install_dependencies
-    create_initial_commit
     show_completion_info
 }
 
