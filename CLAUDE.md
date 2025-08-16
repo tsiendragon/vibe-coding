@@ -33,6 +33,8 @@ The repository implements an AI agent workflow (`pytorch_project/workflow/extrac
 
 # Supported project types:
 # - pytorch: PyTorch deep learning projects
+# - backend: FastAPI backend API projects
+# - android: Flutter mobile application projects
 # - web: Web development projects  
 # - data-science: Data science projects
 # - research: Research projects
@@ -40,6 +42,8 @@ The repository implements an AI agent workflow (`pytorch_project/workflow/extrac
 
 # Examples:
 ./setup_project.sh my-classifier pytorch
+./setup_project.sh my-api backend
+./setup_project.sh my-app android
 ./setup_project.sh web-app web ~/projects/
 ./setup_project.sh data-analysis data-science
 ```
@@ -72,6 +76,41 @@ mypy .
 
 # Combined quality check
 black . && ruff check . && mypy .
+```
+
+### Backend/FastAPI Development
+```bash
+# Start development server
+uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Database migrations
+alembic upgrade head                                    # Apply migrations
+alembic revision --autogenerate -m "description"       # Generate migration
+
+# API documentation
+# Visit http://localhost:8000/docs for interactive docs
+
+# Production server
+gunicorn src.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+```
+
+### Android/Flutter Development  
+```bash
+# Run development build
+flutter run
+
+# Run on specific device
+flutter devices                    # List available devices
+flutter run -d <device_id>        # Run on specific device
+
+# Build and test
+flutter build apk                  # Build Android APK
+flutter build ios                  # Build iOS (macOS only)
+flutter test                      # Run all tests
+flutter test test/unit/           # Run unit tests only
+
+# Code generation
+flutter packages pub run build_runner build --delete-conflicting-outputs
 ```
 
 ### PyTorch Training
@@ -110,6 +149,31 @@ python -m src.lightning_module_template
 - Types: feat, fix, docs, test, refactor, perf, chore
 - One commit = one logical change
 
+### Backend/FastAPI Structure (`backend_project/standards/fastapi_standards.md`)
+```
+src/
+├─ api/v1/endpoints/    # API route handlers
+├─ core/               # Configuration, security, database
+├─ models/             # SQLAlchemy models
+├─ schemas/            # Pydantic schemas
+├─ services/           # Business logic
+├─ utils/              # Utilities
+├─ middleware/         # Custom middleware
+└─ main.py            # FastAPI application entry
+```
+
+### Android/Flutter Structure (`android_project/standards/flutter_standards.md`)
+```
+lib/
+├─ main.dart          # Application entry
+├─ app/               # App configuration and routes
+├─ core/              # Constants, errors, network, storage
+├─ data/              # Data sources, models, repositories
+├─ domain/            # Entities, repositories, use cases
+├─ presentation/      # Pages, widgets, providers
+└─ shared/            # Extensions, mixins, validators
+```
+
 ### PyTorch Structure (`pytorch_project/standards/pytorch_standards.md`)
 ```
 src/
@@ -125,6 +189,8 @@ src/
 ## Agent Responsibilities
 
 ### Core Agents
+
+#### PyTorch Project Agents
 - **Product Manager**: PRD creation, requirements validation
 - **Tech Lead**: Architecture decisions, coordination, delivery approval
 - **Researcher**: Literature review, feasibility analysis, theory validation
@@ -132,6 +198,26 @@ src/
 - **Code Reviewer**: Continuous quality monitoring, standards enforcement
 - **QA Engineer**: Test creation, performance benchmarks, robustness testing
 - **Docs Writer**: Documentation system, knowledge integration
+
+#### Backend Project Agents
+- **API Product Manager**: API requirements, endpoint specifications
+- **Tech Lead**: System architecture, coordination
+- **API Architect**: API design, REST standards
+- **Backend Developer**: API implementation, business logic
+- **Database Engineer**: Data modeling, query optimization
+- **DevOps Engineer**: Deployment, CI/CD, monitoring
+- **API Tester**: API testing, performance testing
+- **Code Reviewer**: Code quality, security review
+
+#### Android Project Agents
+- **Mobile Product Manager**: Mobile app requirements, user experience
+- **Tech Lead**: Mobile architecture, coordination
+- **UI/UX Designer**: Interface design, user experience
+- **Flutter Developer**: App implementation, state management
+- **State Manager**: State architecture, data flow
+- **Mobile Tester**: UI testing, device compatibility
+- **Release Manager**: App store deployment, versioning
+- **Code Reviewer**: Code quality, Flutter best practices
 
 ### Collaboration Points
 - TECH_SPEC review: 4-agent validation
@@ -169,7 +255,9 @@ src/
 ```
 
 ### Agent Configuration (`.claude/agents/`)
-The repository includes pre-configured agents for multi-agent collaboration:
+The repository includes project-specific agent configurations:
+
+#### PyTorch Project Agents (`pytorch_project/agents/`)
 - `agent-product-manager.md` - Requirements analysis and PRD writing
 - `agent-tech-lead.md` - Technical architecture and project coordination
 - `agent-researcher.md` - Literature review and feasibility analysis
@@ -177,6 +265,26 @@ The repository includes pre-configured agents for multi-agent collaboration:
 - `agent-code-reviewer.md` - Code quality and standards enforcement
 - `agent-qa-engineer.md` - Testing and quality assurance
 - `agent-docs-writer.md` - Documentation and knowledge integration
+
+#### Backend Project Agents (`backend_project/agents/`)
+- `agent-api-product-manager.md` - API requirements and specifications
+- `agent-tech-lead.md` - System architecture coordination
+- `agent-api-architect.md` - API design and REST standards
+- `agent-backend-developer.md` - API implementation and business logic
+- `agent-database-engineer.md` - Data modeling and optimization
+- `agent-devops-engineer.md` - Deployment and infrastructure
+- `agent-api-tester.md` - API testing and performance validation
+- `agent-code-reviewer.md` - Code quality and security review
+
+#### Android Project Agents (`android_project/agents/`)
+- `agent-mobile-product-manager.md` - Mobile app requirements
+- `agent-tech-lead.md` - Mobile architecture coordination
+- `agent-ui-designer.md` - Interface and user experience design
+- `agent-flutter-developer.md` - Flutter app implementation
+- `agent-state-manager.md` - State management architecture
+- `agent-mobile-tester.md` - Mobile testing and compatibility
+- `agent-release-manager.md` - App store deployment
+- `agent-code-reviewer.md` - Flutter code quality and best practices
 
 ### OmegaConf Pattern
 - Use `class_path + init_args` for instantiation
@@ -217,12 +325,33 @@ project_name/
 6. **Delivery Phase**: Multi-agent validation and documentation
 
 ### Standards Enforcement
+
+#### PyTorch Projects
 - All Python code must follow `pytorch_project/standards/pycode_standards.md`
 - All tests must follow `pytorch_project/standards/pytest_stands.md`
 - All commits must follow `pytorch_project/standards/git_commit_std.md`
 - PyTorch projects must follow `pytorch_project/standards/pytorch_standards.md`
 
+#### Backend Projects
+- All Python code must follow `backend_project/standards/pycode_standards.md`
+- All FastAPI code must follow `backend_project/standards/fastapi_standards.md`
+- All tests must follow `backend_project/standards/pytest_stands.md`
+- All commits must follow `backend_project/standards/git_commit_std.md`
+
+#### Android Projects
+- All Dart code must follow `android_project/standards/dart_standards.md`
+- All Flutter code must follow `android_project/standards/flutter_standards.md`
+- All tests must follow `android_project/standards/dart_test_standards.md`
+- All commits must follow `android_project/standards/git_commit_std.md`
+
 ### Knowledge Management
-- Document successful patterns in `pytorch_project/knowledge/best_practices/`
-- Record error cases and solutions in `pytorch_project/knowledge/error_cases/`
-- Use provided templates from `pytorch_project/documentation/`
+
+#### Project-Specific Knowledge Bases
+- **PyTorch**: `pytorch_project/knowledge/best_practices/` and `pytorch_project/knowledge/error_cases/`
+- **Backend**: `backend_project/knowledge/best_practices/` and `backend_project/knowledge/error_cases/`
+- **Android**: `android_project/knowledge/best_practices/` and `android_project/knowledge/error_cases/`
+
+#### Available Templates
+- **PyTorch**: `pytorch_project/documentation/` - ML-specific templates
+- **Backend**: `backend_project/documentation/` - API-specific templates
+- **Android**: `android_project/documentation/` - Mobile-specific templates
