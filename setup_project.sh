@@ -258,6 +258,55 @@ create_project_directory() {
     fi
 }
 
+# 处理CLAUDE.md文件创建和合并
+handle_claude_md() {
+    local source_claude_md="$SOURCE_REPO/${PROJECT_TYPE}_project/CLAUDE.md"
+    local target_claude_md="CLAUDE.md"
+    
+    if [[ "$EXISTING_PROJECT" == "true" ]]; then
+        # 已有项目：合并内容到现有CLAUDE.md
+        if [[ -f "$target_claude_md" ]]; then
+            log_info "检测到现有CLAUDE.md，合并项目特定内容..."
+            
+            # 备份现有文件
+            cp "$target_claude_md" "${target_claude_md}.backup"
+            
+            # 如果源CLAUDE.md存在，追加项目特定内容
+            if [[ -f "$source_claude_md" ]]; then
+                echo "" >> "$target_claude_md"
+                echo "# ============================================" >> "$target_claude_md"
+                echo "# $(echo "$PROJECT_TYPE" | tr '[:lower:]' '[:upper:]') Project Specific Configuration" >> "$target_claude_md"
+                echo "# ============================================" >> "$target_claude_md"
+                echo "" >> "$target_claude_md"
+                
+                # 提取项目特定内容（跳过通用标题）
+                tail -n +2 "$source_claude_md" >> "$target_claude_md"
+                
+                log_success "已将${PROJECT_TYPE}项目配置合并到现有CLAUDE.md"
+                log_info "原文件已备份为${target_claude_md}.backup"
+            else
+                log_error "警告: 未找到${PROJECT_TYPE}项目的CLAUDE.md模板"
+            fi
+        else
+            # 现有项目但没有CLAUDE.md，直接复制
+            if [[ -f "$source_claude_md" ]]; then
+                cp "$source_claude_md" "$target_claude_md"
+                log_success "为现有项目创建${PROJECT_TYPE}项目的CLAUDE.md"
+            else
+                log_error "警告: 未找到${PROJECT_TYPE}项目的CLAUDE.md模板"
+            fi
+        fi
+    else
+        # 新项目：直接复制CLAUDE.md
+        if [[ -f "$source_claude_md" ]]; then
+            cp "$source_claude_md" "$target_claude_md"
+            log_success "创建${PROJECT_TYPE}项目的初始CLAUDE.md"
+        else
+            log_error "警告: 未找到${PROJECT_TYPE}项目的CLAUDE.md模板"
+        fi
+    fi
+}
+
 # 复制核心文档和配置
 copy_core_files() {
     log_info "复制核心文档和配置..."
@@ -270,7 +319,8 @@ copy_core_files() {
     mkdir -p docs/knowledge/error_cases
     mkdir -p .claude/agents
     
-    # CLAUDE.md由Claude Code自动生成，无需复制
+    # 处理CLAUDE.md文件
+    handle_claude_md
     
     # 复制工作流文档
     WORKFLOW_COPIED=false
@@ -367,10 +417,12 @@ show_completion_info() {
     echo
     echo -e "${GREEN}下一步操作:${NC}"
     echo "  1. cd $PROJECT_PATH"
-    echo "  2. 阅读 docs/workflows/workflow.md 了解AI协作流程"
-    echo "  3. 开始需求分析: cp docs/templates/PRD/prd_template.md docs/PRD.md"
+    echo "  2. 阅读 CLAUDE.md 了解项目特定的AI协作指南"
+    echo "  3. 阅读 docs/workflows/workflow.md 了解详细工作流程"
+    echo "  4. 提供项目需求开始AI协作开发"
     echo
     echo -e "${BLUE}重要文档:${NC}"
+    echo "  - 项目指南: CLAUDE.md (项目特定配置和要求说明)"
     echo "  - 工作流程: docs/workflows/workflow.md"
     echo "  - 代码规范: docs/standards/"
     echo "  - 文档模板: docs/templates/"
