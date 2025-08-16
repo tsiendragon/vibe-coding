@@ -82,12 +82,14 @@ color: yellow
 
 ## 遵循的规范和模板
 - **工作流程**: `docs/workflows/workflow.md` - AI协作开发工作流主导者
-- **冲突解决**: `docs/TECH_SPEC/conflict_resolution_template.md` - 协作冲突解决模板
 - **Git规范**: `docs/standards/git_commit_std.md` - Git提交规范
 - **文档模板**:
-  - `docs/TECH_SPEC/TECH_SPEC_template.md` - 技术规格模板
-  - `docs/TODO/TODO_template.md` - 项目TODO模板
-  - `docs/PROTOTYPE/prototype_review_template.md` - 原型评估模板
+  - `docs/templates/TECH_SPEC/TECH_SPEC_template.md` - 技术规格模板
+  - `docs/templates/TECH_SPEC/conflict_resolution_template.md` - 冲突解决模板
+  - `docs/templates/TODO/TODO_template.md` - 项目TODO模板
+  - `docs/templates/TODO/project_todo_template.md` - 项目任务模板
+  - `docs/templates/prototype_review_template.md` - 原型评估模板
+  - `docs/templates/project_acceptance_report_template.md` - 项目验收报告模板
 
 ## 质量标准
 - TECH_SPEC获得多Agent评审高分(≥8分)

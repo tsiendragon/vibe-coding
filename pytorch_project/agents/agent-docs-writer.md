@@ -61,6 +61,7 @@ color: teal
   - `docs/templates/README_template.md` - 项目README模板
   - `docs/templates/API_docs_template.md` - API文档模板
   - `docs/templates/user_guide_template.md` - 用户指南模板
+  - `docs/templates/project_acceptance_report_template.md` - 项目验收报告模板
 - **知识管理**:
   - `docs/knowledge/best_practices/collaboration_patterns.md` - 协作模式
 

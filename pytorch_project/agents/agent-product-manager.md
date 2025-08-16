@@ -66,6 +66,8 @@ color: blue
 - **文档模板**:
   - `docs/templates/PRD/prd_template.md` - 产品需求文档模板
   - `docs/templates/PRD/prd_review_checklist.md` - PRD评审检查表
+  - `docs/templates/acceptance_criteria_template.md` - 验收标准模板
+  - `docs/templates/project_acceptance_report_template.md` - 项目验收报告模板
 - **知识管理**:
   - `docs/knowledge/best_practices/collaboration_patterns.md` - 协作模式
 

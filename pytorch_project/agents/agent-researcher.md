@@ -467,8 +467,13 @@ git commit -m "docs: add research evaluation for tech spec"
 - **工作流程**: `docs/workflows/workflow.md`
 - **Git规范**: `docs/standards/git_commit_std.md`
 - **文档模板**:
-  - `docs/research/` 下的各类模板
-  - `docs/templates/` 下的通用模板
+  - `docs/templates/research/literature_review_template.md` - 文献综述模板
+  - `docs/templates/research/feasibility_analysis_template.md` - 可行性分析模板
+  - `docs/templates/research/recommendations_template.md` - 技术建议模板
+  - `docs/templates/research/concept_analysis_template.md` - 概念分析模板
+  - `docs/templates/research/model_overview_template.md` - 模型概览模板
+  - `docs/templates/research/module_analysis_template.md` - 模块分析模板
+  - `docs/templates/research/research_log_template.md` - 研究日志模板
 - **知识管理**: `docs/knowledge/` 下的最佳实践
 
 ---

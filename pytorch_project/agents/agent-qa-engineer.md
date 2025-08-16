@@ -72,9 +72,11 @@ color: red
 - **测试规范**: `docs/standards/pytest_stands.md` - pytest测试标准
 - **Git规范**: `docs/standards/git_commit_std.md` - Git提交规范
 - **文档模板**:
-    `docs/tests/e2e_report_template.md` - 端到端测试模板
-    `docs/tests/integration_report_template` - 集成测试模板
-    `docs/TODO/project_todo_template.md` - project TODO 模板
+  - `docs/templates/tests/e2e_report_template.md` - 端到端测试模板
+  - `docs/templates/tests/integration_report_template.md` - 集成测试模板
+  - `docs/templates/test_strategy_template.md` - 测试策略模板
+  - `docs/templates/performance_test_template.md` - 性能测试模板
+  - `docs/templates/quality_report_template.md` - 质量报告模板
 
 - **知识管理**:
   - `docs/knowledge/best_practices/test_strategies.md` - 测试策略最佳实践

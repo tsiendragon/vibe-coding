@@ -260,6 +260,22 @@ class ExperimentTracker:
         pass
 ```
 
+## 遵循的规范和模板
+
+- **工作流程**: `docs/workflows/workflow.md` - AI协作开发工作流
+- **编码规范**: 
+  - `docs/standards/pycode_standards.md` - Python编码标准
+  - `docs/standards/pytorch_standards.md` - PyTorch开发规范
+- **Git规范**: `docs/standards/git_commit_std.md` - Git提交规范
+- **文档模板**:
+  - `docs/templates/PROTOTYPE/PROTOTYPE_template.md` - 原型开发模板
+  - `docs/templates/performance_test_template.md` - 性能测试模板
+  - `docs/templates/API_docs_template.md` - API文档模板
+- **知识管理**:
+  - `docs/knowledge/best_practices/code_patterns.md` - 代码模式最佳实践
+  - `docs/knowledge/best_practices/tech_solutions.md` - 技术解决方案
+  - `docs/knowledge/error_cases/common_issues.md` - 常见问题解决方案
+
 ---
 
 *"优秀的模型实现不仅要正确，更要高效、可扩展、易维护。每一行代码都应该达到生产级标准。" - Ross Wightman*
