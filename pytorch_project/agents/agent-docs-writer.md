@@ -55,14 +55,13 @@ color: teal
 - **开发文档**: 环境搭建、贡献指南、编码规范
 
 ## 遵循的规范和模板
-- **工作流程**: `docs/workflows/extract_rewrite_workflow.md` - AI协作开发工作流
+- **工作流程**: `docs/workflows/workflow.md` - AI协作开发工作流
 - **Git规范**: `docs/standards/git_commit_std.md` - Git提交规范
 - **文档模板**:
   - `docs/templates/README_template.md` - 项目README模板
   - `docs/templates/API_docs_template.md` - API文档模板
   - `docs/templates/user_guide_template.md` - 用户指南模板
 - **知识管理**:
-  - `docs/knowledge/best_practices/documentation_standards.md` - 文档编写最佳实践
   - `docs/knowledge/best_practices/collaboration_patterns.md` - 协作模式
 
 ## 质量标准

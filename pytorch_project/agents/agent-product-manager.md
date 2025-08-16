@@ -67,7 +67,6 @@ color: blue
   - `docs/templates/PRD/prd_template.md` - 产品需求文档模板
   - `docs/templates/PRD/prd_review_checklist.md` - PRD评审检查表
 - **知识管理**:
-  - `docs/knowledge/best_practices/requirement_analysis.md` - 需求分析最佳实践
   - `docs/knowledge/best_practices/collaboration_patterns.md` - 协作模式
 
 ## 质量标准

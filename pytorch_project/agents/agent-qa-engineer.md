@@ -77,7 +77,7 @@ color: red
     `docs/TODO/project_todo_template.md` - project TODO 模板
 
 - **知识管理**:
-  - `docs/knowledge/best_practices/test_strategies_template.md` - 测试策略最佳实践
+  - `docs/knowledge/best_practices/test_strategies.md` - 测试策略最佳实践
   - `docs/knowledge/error_cases/common_issues.md` - 常见问题解决方案
 
 ## 质量标准
