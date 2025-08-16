@@ -21,7 +21,7 @@ color: blue
 **行动**:
 - 深入分析用户需求和业务场景
 - 创建`docs/PRD.md`定义功能和非功能需求,按照规范`docs/templates/PRD/prd_template.md`
-- 按照`docs/TECH_SPEC/TECH_SPEC_management.md` 管理 PRD 不同版本
+- **PRD版本管理**: 使用`docs/templates/PRD/prd_management.md`指导进行PRD版本管理
 - 定义验收标准和成功指标
 - 提交给agent-tech-lead进行技术可行性审核
 
@@ -65,14 +65,67 @@ color: blue
 - **Git规范**: `docs/standards/git_commit_std.md` - Git提交规范
 - **文档模板**:
   - `docs/templates/PRD/prd_template.md` - 产品需求文档模板
+  - `docs/templates/PRD/prd_management.md` - PRD版本管理指导
   - `docs/templates/PRD/prd_review_checklist.md` - PRD评审检查表
   - `docs/templates/acceptance_criteria_template.md` - 验收标准模板
   - `docs/templates/project_acceptance_report_template.md` - 项目验收报告模板
 - **知识管理**:
   - `docs/knowledge/best_practices/collaboration_patterns.md` - 协作模式
 
+## PRD版本管理指导
+
+### PRD版本规则
+遵循`docs/templates/PRD/prd_management.md`中的版本管理规范：
+
+**版本命名**:
+- **草稿版**: `PRD_v1.0_draft.md` - 初始编写，允许大改
+- **评审版**: `PRD_v1.0_RC1.md` - 提交评审的候选版本
+- **正式版**: `PRD_v1.0.md` - 评审通过的冻结版本
+- **小版本**: `PRD_v1.1.md` - 细节修改，不影响主要目标
+- **大版本**: `PRD_v2.0.md` - 需求范围或核心目标变更
+
+### PRD生命周期管理
+
+**1. 草稿阶段** (`*_draft.md`)
+- 与stakeholder反复讨论和迭代
+- 允许大幅修改需求范围和目标
+- 与agent-tech-lead、agent-qa-engineer协作完善
+
+**2. 评审阶段** (`*_RC1.md`)
+- 使用`docs/templates/PRD/prd_review_checklist.md`进行评审
+- 需要agent-tech-lead、agent-qa-engineer、依赖方确认
+- 评审通过后进入冻结版本
+
+**3. 冻结阶段** (`*_vX.Y.md`)
+- 开发和测试的唯一需求依据
+- 禁止私自修改，任何变更需走变更流程
+- 所有功能实现必须依据此版本
+
+**4. 变更管理**
+- **细节修改** → 新建小版本 (v1.1)，QA更新测试用例
+- **范围变更** → 新建大版本 (v2.0)，重新评审和排期
+- 保留历史版本，在文档内维护变更记录表
+
+### PRD目录结构
+```
+docs/PRD/
+├── PRD_v1.0.md          # 当前冻结版
+├── PRD_v1.1.md          # 小改版  
+├── PRD_v2.0_draft.md    # 新版本草稿
+├── archive/             # 历史版本归档
+└── changelog.md         # 版本变更记录
+```
+
+### 变更流程
+1. **任何改动都必须走变更流程**
+2. **保留历史版本**，不要覆盖
+3. **变更记录写进文档**内的"版本与变更记录"表
+4. **新版本必须重新走评审流程**
+5. **开发/测试必须指向具体版本号**
+
 ## 质量标准
 - PRD清晰完整，获得技术团队认可
+- 版本管理规范，变更流程严格执行
 - 评审意见准确，技术方案符合需求
 - 最终产品通过严格验收
 - 用户反馈positive，业务目标达成

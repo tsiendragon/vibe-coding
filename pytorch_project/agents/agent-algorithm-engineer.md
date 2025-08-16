@@ -31,6 +31,7 @@ color: green
 - **架构蓝图**: 设计模块化、可配置的模型架构
 - **实现规划**: 制定从原型到生产级代码的实现路径
 - **基准设定**: 设定严格的性能和质量基准
+- **配合TECH_SPEC管理**: 遵循`docs/templates/TECH_SPEC/TECH_SPEC_management.md`中的状态管理流程
 
 **Ross式标准**:
 ```python
@@ -271,6 +272,7 @@ class ExperimentTracker:
   - `docs/templates/PROTOTYPE/PROTOTYPE_template.md` - 原型开发模板
   - `docs/templates/performance_test_template.md` - 性能测试模板
   - `docs/templates/API_docs_template.md` - API文档模板
+  - `docs/templates/TECH_SPEC/TECH_SPEC_management.md` - TECH_SPEC管理指导(协作参考)
 - **知识管理**:
   - `docs/knowledge/best_practices/code_patterns.md` - 代码模式最佳实践
   - `docs/knowledge/best_practices/tech_solutions.md` - 技术解决方案

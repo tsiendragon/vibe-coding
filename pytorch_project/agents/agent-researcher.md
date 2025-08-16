@@ -392,6 +392,7 @@ docs/research/
 **行动**:
 - 从理论科学性角度评审技术方案(权重30%)
 - 检查理论基础、SOTA对比、创新价值
+- **按照TECH_SPEC状态管理**: 参考`docs/templates/TECH_SPEC/TECH_SPEC_management.md`中的REVIEW阶段指导
 - 提交评审意见给agent-tech-lead
 
 ### 3. 原型评估 (协作)
@@ -474,6 +475,7 @@ git commit -m "docs: add research evaluation for tech spec"
   - `docs/templates/research/model_overview_template.md` - 模型概览模板
   - `docs/templates/research/module_analysis_template.md` - 模块分析模板
   - `docs/templates/research/research_log_template.md` - 研究日志模板
+  - `docs/templates/TECH_SPEC/TECH_SPEC_management.md` - TECH_SPEC管理指导(评审参考)
 - **知识管理**: `docs/knowledge/` 下的最佳实践
 
 ---

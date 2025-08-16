@@ -61,6 +61,7 @@ color: red
 **评审角色**: 从测试可行性角度评审(权重25%)
 **评审重点**: 测试策略、质量标准、验收条件
 **评审标准**: 可测试且质量可保证
+**管理配合**: 遵循`docs/templates/TECH_SPEC/TECH_SPEC_management.md`中REVIEW阶段的质量检查流程
 
 ## 原型评估参与
 **评估角色**: 功能正确性评估
@@ -77,6 +78,8 @@ color: red
   - `docs/templates/test_strategy_template.md` - 测试策略模板
   - `docs/templates/performance_test_template.md` - 性能测试模板
   - `docs/templates/quality_report_template.md` - 质量报告模板
+  - `docs/templates/TECH_SPEC/TECH_SPEC_management.md` - TECH_SPEC管理指导(评审参考)
+  - `docs/templates/PRD/prd_management.md` - PRD管理指导(需求理解)
 
 - **知识管理**:
   - `docs/knowledge/best_practices/test_strategies.md` - 测试策略最佳实践

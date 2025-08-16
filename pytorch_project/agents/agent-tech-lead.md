@@ -85,14 +85,100 @@ color: yellow
 - **Git规范**: `docs/standards/git_commit_std.md` - Git提交规范
 - **文档模板**:
   - `docs/templates/TECH_SPEC/TECH_SPEC_template.md` - 技术规格模板
+  - `docs/templates/TECH_SPEC/TECH_SPEC_management.md` - TECH_SPEC管理指导
   - `docs/templates/TECH_SPEC/conflict_resolution_template.md` - 冲突解决模板
   - `docs/templates/TODO/TODO_template.md` - 项目TODO模板
   - `docs/templates/TODO/project_todo_template.md` - 项目任务模板
   - `docs/templates/prototype_review_template.md` - 原型评估模板
   - `docs/templates/project_acceptance_report_template.md` - 项目验收报告模板
 
+## TECH_SPEC版本管理指导
+
+### TECH_SPEC版本规则
+遵循`docs/templates/TECH_SPEC/TECH_SPEC_management.md`中的管理规范：
+
+**版本命名**: `Major.Minor.Patch`
+- **Major**: 架构级变更（不兼容）
+- **Minor**: 新增功能/模块  
+- **Patch**: 小修改/修复
+
+**状态管理**: DRAFT → RESEARCH → DESIGN → PROTOTYPE → REVIEW → APPROVED → ACTIVE → IMPLEMENTING → TESTING → COMPLETED
+
+### TECH_SPEC生命周期管理
+
+**1. 草稿阶段 (DRAFT)**
+- 基于agent-product-manager的PRD起草技术规范
+- 定义问题、目标、初版架构设计
+- 如调研后发现方案不妥，回到此阶段重写
+
+**2. 调研与可行性 (RESEARCH)**  
+- 配合agent-researcher进行方案调研
+- 与agent-algorithm-engineer验证技术可行性
+- 不可行则回DRAFT调整方案
+
+**3. 方案设计 (DESIGN)**
+- 沉淀系统/数据/模型/评测方案
+- 明确输入输出契约、风控与里程碑
+- 设计作为原型实现的蓝本
+
+**4. 原型验证 (PROTOTYPE)**
+- 监督agent-algorithm-engineer实现最小可行原型
+- 验证端到端链路和关键指标
+- 原型失败则回DESIGN重构方案
+
+**5. 评审 (REVIEW)**
+- 组织多Agent评审：agent-researcher(理论)、agent-algorithm-engineer(架构)、agent-qa-engineer(质量)、agent-product-manager(需求)
+- 发现结构性问题回DRAFT重新修订
+- 通过则进入批准
+
+**6. 批准与激活 (APPROVED → ACTIVE)**
+- 正式通过，确认范围/方案冻结
+- 发布立项计划，项目进入活跃态
+- 允许投入资源与排期
+
+### TECH_SPEC目录结构
+```
+docs/TECH_SPEC/
+├── TECH_SPEC.md           # 当前活跃版本
+├── versions/              # 历史版本
+│   ├── v1.0_2024-01-15.md
+│   ├── v1.1_2024-02-01.md  
+│   └── v2.0_2024-03-01.md
+├── components/            # 模块化管理
+│   ├── architecture.md    # 架构部分
+│   ├── interfaces.md      # 接口部分  
+│   ├── implementation.md  # 实现部分
+│   └── performance.md     # 性能部分
+└── changelog.md           # 变更记录
+```
+
+### 变更管理流程
+**持续更新 (UPDATING)**:
+- 从ACTIVE切到UPDATING状态
+- 产品经理新需求或技术优化触发
+- 提交变更走REVIEW→实施→测试闭环
+
+**版本头部管理**:
+```markdown
+---
+version: 2.1.0
+date: 2024-03-15  
+status: ACTIVE | DRAFT | DEPRECATED
+authors: [tech-lead, algorithm-engineer]
+reviewers: [researcher, qa-engineer, product-manager]
+---
+```
+
+**变更记录维护**:
+- Added: 新增功能特性
+- Changed: 修改现有功能
+- Deprecated: 标记废弃特性
+- Fixed: 修复问题
+- Impact: 影响评估和迁移指导
+
 ## 质量标准
 - TECH_SPEC获得多Agent评审高分(≥8分)
+- 版本管理规范，状态转换清晰
 - 原型获得三方评估认可
 - 项目按计划推进，里程碑如期完成
 - Agent间协作顺畅，冲突及时解决
