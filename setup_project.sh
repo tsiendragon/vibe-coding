@@ -270,11 +270,7 @@ copy_core_files() {
     mkdir -p docs/knowledge/error_cases
     mkdir -p .claude/agents
     
-    # 复制CLAUDE.md配置文件
-    if [[ -f "$SOURCE_REPO/CLAUDE.md" ]]; then
-        cp "$SOURCE_REPO/CLAUDE.md" .
-        log_success "复制 CLAUDE.md"
-    fi
+    # CLAUDE.md由Claude Code自动生成，无需复制
     
     # 复制工作流文档
     WORKFLOW_COPIED=false
