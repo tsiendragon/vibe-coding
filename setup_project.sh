@@ -39,6 +39,8 @@ Claude Code AI协作开发项目快速搭建脚本
 
 支持的项目类型:
     pytorch          PyTorch深度学习项目
+    backend          FastAPI后端项目
+    android          Flutter移动应用项目
     web              Web开发项目  
     data-science     数据科学项目
     research         研究型项目
@@ -46,8 +48,8 @@ Claude Code AI协作开发项目快速搭建脚本
 
 示例:
     ./setup_project.sh my-classifier pytorch
-    ./setup_project.sh web-app web ~/projects/
-    ./setup_project.sh data-analysis data-science
+    ./setup_project.sh my-api backend
+    ./setup_project.sh my-app android ~/projects/
 
 EOF
 }
@@ -72,11 +74,11 @@ check_arguments() {
 
     # 验证项目类型
     case "$PROJECT_TYPE" in
-        pytorch|web|data-science|research|general)
+        pytorch|backend|android|web|data-science|research|general)
             ;;
         *)
             log_error "不支持的项目类型: $PROJECT_TYPE"
-            log_info "支持的类型: pytorch, web, data-science, research, general"
+            log_info "支持的类型: pytorch, backend, android, web, data-science, research, general"
             exit 1
             ;;
     esac
@@ -111,8 +113,12 @@ create_project_directory() {
 copy_core_files() {
     log_info "复制核心文档和配置..."
     
-    # 创建目录结构
-    mkdir -p {docs/{workflows,standards,templates,knowledge/{best_practices,error_cases}}}
+    # 创建目录结构 - 只创建.claude和docs
+    mkdir -p docs/workflows
+    mkdir -p docs/standards
+    mkdir -p docs/templates
+    mkdir -p docs/knowledge/best_practices
+    mkdir -p docs/knowledge/error_cases
     mkdir -p .claude/agents
     
     # 复制CLAUDE.md配置文件
@@ -122,171 +128,89 @@ copy_core_files() {
     fi
     
     # 复制工作流文档
-    if [[ -f "$SOURCE_REPO/pytorch_project/workflow/extract_rewrite/workflow.md" ]]; then
-        cp "$SOURCE_REPO/pytorch_project/workflow/extract_rewrite/workflow.md" \
-           docs/workflows/
-        log_success "复制工作流文档"
+    WORKFLOW_COPIED=false
+    for workflow_path in \
+        "$SOURCE_REPO/${PROJECT_TYPE}_project/workflow/extract_rewrite/workflow.md" \
+        "$SOURCE_REPO/pytorch_project/workflow/extract_rewrite/workflow.md"; do
+        if [[ -f "$workflow_path" ]]; then
+            cp "$workflow_path" docs/workflows/
+            log_success "复制工作流文档"
+            WORKFLOW_COPIED=true
+            break
+        fi
+    done
+    
+    if [[ "$WORKFLOW_COPIED" == "false" ]]; then
+        log_error "警告: 未找到工作流文档"
     fi
     
     # 复制标准规范
-    if [[ -d "$SOURCE_REPO/pytorch_project/standards" ]]; then
-        cp -r "$SOURCE_REPO/pytorch_project/standards"/* docs/standards/
-        log_success "复制标准规范"
+    STANDARDS_COPIED=false
+    for standards_path in \
+        "$SOURCE_REPO/${PROJECT_TYPE}_project/standards" \
+        "$SOURCE_REPO/pytorch_project/standards"; do
+        if [[ -d "$standards_path" ]]; then
+            cp -r "$standards_path"/* docs/standards/
+            log_success "复制标准规范"
+            STANDARDS_COPIED=true
+            break
+        fi
+    done
+    
+    if [[ "$STANDARDS_COPIED" == "false" ]]; then
+        log_error "警告: 未找到标准规范"
     fi
     
     # 复制文档模板
-    if [[ -d "$SOURCE_REPO/pytorch_project/documentation" ]]; then
-        cp -r "$SOURCE_REPO/pytorch_project/documentation"/* docs/templates/
-        log_success "复制文档模板"
+    TEMPLATES_COPIED=false
+    for templates_path in \
+        "$SOURCE_REPO/${PROJECT_TYPE}_project/documentation" \
+        "$SOURCE_REPO/pytorch_project/documentation"; do
+        if [[ -d "$templates_path" ]]; then
+            cp -r "$templates_path"/* docs/templates/
+            log_success "复制文档模板"
+            TEMPLATES_COPIED=true
+            break
+        fi
+    done
+    
+    if [[ "$TEMPLATES_COPIED" == "false" ]]; then
+        log_error "警告: 未找到文档模板"
     fi
     
-    # 复制知识库模板
-    if [[ -d "$SOURCE_REPO/pytorch_project/knowledge" ]]; then
-        cp -r "$SOURCE_REPO/pytorch_project/knowledge"/* docs/knowledge/
-        log_success "复制知识库"
+    # 复制知识库
+    KNOWLEDGE_COPIED=false
+    for knowledge_path in \
+        "$SOURCE_REPO/${PROJECT_TYPE}_project/knowledge" \
+        "$SOURCE_REPO/pytorch_project/knowledge"; do
+        if [[ -d "$knowledge_path" ]]; then
+            cp -r "$knowledge_path"/* docs/knowledge/
+            log_success "复制知识库"
+            KNOWLEDGE_COPIED=true
+            break
+        fi
+    done
+    
+    if [[ "$KNOWLEDGE_COPIED" == "false" ]]; then
+        log_error "警告: 未找到知识库"
     fi
     
     # 复制Agent配置
-    if [[ -d "$SOURCE_REPO/pytorch_project/agents" ]]; then
-        cp -r "$SOURCE_REPO/pytorch_project/agents"/* .claude/agents/
-        log_success "复制Agent配置"
+    AGENTS_COPIED=false
+    for agents_path in \
+        "$SOURCE_REPO/${PROJECT_TYPE}_project/agents" \
+        "$SOURCE_REPO/pytorch_project/agents"; do
+        if [[ -d "$agents_path" ]]; then
+            cp -r "$agents_path"/* .claude/agents/
+            log_success "复制Agent配置"
+            AGENTS_COPIED=true
+            break
+        fi
+    done
+    
+    if [[ "$AGENTS_COPIED" == "false" ]]; then
+        log_error "警告: 未找到Agent配置"
     fi
-}
-
-# 根据项目类型创建对应结构
-setup_project_structure() {
-    log_info "为项目类型 '$PROJECT_TYPE' 创建目录结构..."
-    
-    case "$PROJECT_TYPE" in
-        pytorch)
-            mkdir -p {src,tests/{unit,integration,e2e},configs,data,models,notebooks,scripts}
-            echo "torch>=2.0.0" > requirements.txt
-            echo "pytorch-lightning>=2.0.0" >> requirements.txt
-            echo "pytest>=7.0.0" >> requirements.txt
-            echo "pytest-cov>=4.0.0" >> requirements.txt
-            ;;
-        web)
-            mkdir -p {src,tests,public,docs}
-            cat > package.json << EOF
-{
-  "name": "$PROJECT_NAME",
-  "version": "0.1.0",
-  "description": "Web应用项目",
-  "main": "index.js",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "test": "jest"
-  }
-}
-EOF
-            ;;
-        data-science)
-            mkdir -p {data/{raw,processed,external},notebooks,src,reports,models}
-            echo "pandas>=1.5.0" > requirements.txt
-            echo "numpy>=1.24.0" >> requirements.txt
-            echo "scikit-learn>=1.2.0" >> requirements.txt
-            echo "jupyter>=1.0.0" >> requirements.txt
-            ;;
-        research)
-            mkdir -p {papers,experiments,data,analysis,presentations}
-            echo "jupyter>=1.0.0" > requirements.txt
-            echo "matplotlib>=3.6.0" >> requirements.txt
-            echo "numpy>=1.24.0" >> requirements.txt
-            ;;
-        general)
-            mkdir -p {src,tests,docs}
-            echo "pytest>=7.0.0" > requirements.txt
-            ;;
-    esac
-    
-    log_success "项目结构创建完成"
-}
-
-# 创建项目README
-create_project_readme() {
-    log_info "创建项目README..."
-    
-    cat > README.md << EOF
-# $PROJECT_NAME
-
-$PROJECT_TYPE 项目，使用Claude Code AI协作开发工作流
-
-## 项目概述
-
-<!-- 项目描述 -->
-
-## AI协作开发工作流
-
-本项目采用多Agent协作开发模式，包含以下Agent：
-
-- **agent-product-manager**: 需求分析、PRD编写、功能验收
-- **agent-tech-lead**: 技术方案设计、架构决策、项目协调
-- **agent-researcher**: 论文调研、技术可行性分析、理论验证
-- **agent-algorithm-engineer**: 算法实现、模型设计、核心开发
-- **agent-code-reviewer**: 代码质量审核、标准检查
-- **agent-qa-engineer**: 测试用例编写、质量保证
-- **agent-docs-writer**: 技术文档、项目文档编写
-
-## 快速开始
-
-### 环境设置
-
-\`\`\`bash
-# 安装依赖
-pip install -r requirements.txt
-
-# 激活Claude Code
-claude-code --version
-\`\`\`
-
-### 开发流程
-
-1. **需求分析阶段**
-   \`\`\`bash
-   # 创建PRD文档
-   cp docs/templates/PRD/prd_template.md docs/PRD.md
-   \`\`\`
-
-2. **技术设计阶段**  
-   \`\`\`bash
-   # 创建TECH_SPEC文档
-   cp docs/templates/TECH_SPEC/TECH_SPEC_template.md docs/TECH_SPEC.md
-   \`\`\`
-
-3. **原型开发阶段**
-   \`\`\`bash
-   # 创建原型文档
-   cp docs/templates/PROTOTYPE/PROTOTYPE_template.md docs/PROTOTYPE.md
-   \`\`\`
-
-## 文档结构
-
-- \`docs/\`: 项目文档
-  - \`docs/templates/\`: 文档模板
-  - \`docs/standards/\`: 代码规范和测试标准
-  - \`docs/knowledge/\`: 最佳实践和错误案例库
-  - \`docs/workflows/\`: AI协作工作流文档
-- \`.claude/agents/\`: Agent配置文件
-
-## 代码规范
-
-- Python代码: 遵循 \`docs/standards/pycode_standards.md\`
-- 测试代码: 遵循 \`docs/standards/pytest_stands.md\`
-- Git提交: 遵循 \`docs/standards/git_commit_std.md\`
-
-## Agent协作
-
-- Agent配置: \`.claude/agents/\` 目录下的markdown文件
-- 工作流程: \`docs/workflows/workflow.md\`
-
-## 许可证
-
-<!-- 添加许可证信息 -->
-EOF
-
-    log_success "项目README创建完成"
 }
 
 # 显示完成信息
@@ -298,15 +222,12 @@ show_completion_info() {
     echo
     echo -e "${GREEN}下一步操作:${NC}"
     echo "  1. cd $PROJECT_PATH"
-    echo "  2. 阅读 README.md 了解项目结构"
-    echo "  3. 阅读 docs/workflows/workflow.md 了解AI协作流程"
-    echo "  4. 开始需求分析: cp docs/templates/PRD/prd_template.md docs/PRD.md"
+    echo "  2. 阅读 docs/workflows/workflow.md 了解AI协作流程"
+    echo "  3. 开始需求分析: cp docs/templates/PRD/prd_template.md docs/PRD.md"
     echo
     echo -e "${BLUE}重要文档:${NC}"
     echo "  - 工作流程: docs/workflows/workflow.md"
-    echo "  - 代码规范: docs/standards/pycode_standards.md"
-    echo "  - 测试规范: docs/standards/pytest_stands.md"
-    echo "  - Git规范: docs/standards/git_commit_std.md"
+    echo "  - 代码规范: docs/standards/"
     echo "  - 文档模板: docs/templates/"
     echo "  - 知识库: docs/knowledge/"
     echo "  - Agent配置: .claude/agents/"
@@ -340,8 +261,6 @@ EOF
     get_script_dir
     create_project_directory
     copy_core_files
-    setup_project_structure
-    create_project_readme
     show_completion_info
 }
 

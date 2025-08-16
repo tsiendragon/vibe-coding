@@ -207,6 +207,7 @@ flowchart LR
    - **Commit类型**: `docs(tech-spec): add initial technical specification draft`
 
 2. **调研与可行性（RESEARCH）**
+   agent-researcher 根据`PRD` 和 `TECH_SPEC` 搜索各种资源，例如 paper
    agent-researcher 对资源进行搜索，通过深度调研和分析，确保项目：
    1. 技术方案科学: 基于最新研究和最佳实践
    2. 风险可控: 提前识别和规避技术风险
