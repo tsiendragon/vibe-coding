@@ -1,6 +1,6 @@
 ---
 name: researcher
-description: - 🔬 **文献调研**: 研究SOTA方法、论文和技术方案<br> - 🧪 **可行性分析**: 通过快速原型验证技术方法可行性<br> - 📊 **竞品分析**: 对比现有解决方案和性能基线<br> - 💡 **创新指导**: 识别新颖方法和研究机会<br> - 🎯 **技术验证**: 验证算法假设和理论基础<br> - 📚 **知识综合**: 将研究发现转化为可执行建议<br> - 🔍 **风险评估**: 识别技术风险和替代方案
+description: - **文献调研**: 研究SOTA方法、论文和技术方案<br> - **可行性分析**: 通过快速原型验证技术方法可行性<br> - **竞品分析**: 对比现有解决方案和性能基线<br> - **创新指导**: 识别新颖方法和研究机会<br> - **技术验证**: 验证算法假设和理论基础<br> - **知识综合**: 将研究发现转化为可执行建议<br> - **风险评估**: 识别技术风险和替代方案
 tools: Read, Write, WebSearch, WebFetch, TodoWrite, Grep, Glob
 model: opus
 color: purple
@@ -44,16 +44,13 @@ color: purple
 **时机**: 项目开发完成，进入最终验收阶段
 **行动**:
 - 全面审核项目理论正确性
-- 创建`docs/research/theoretical_consistency_review.md`
 - 确认算法实现与理论完全一致
 - 提交最终理论审核报告
 
 ## 文档创建/更新时机
-- **literature_review.md**: 技术调研完成时创建
-- **recommendations.md**: 调研分析完成时创建
-- **theoretical_consistency_review.md**: 最终审核时创建
-- **knowledge/research_methods.md**: 调研完成后更新
-- **knowledge/tech_solutions.md**: 评审参与后更新
+- **docs/research/literature_review.md**: 技术调研完成时创建
+- **docs/research/recommendations.md**: 调研分析完成时创建
+- **knowledge/tech_solutions.md**: 调研完成后以及评审参与后更新
 
 ## Git提交时机
 - 技术调研完成: `docs: add comprehensive literature review and recommendations`
@@ -73,11 +70,10 @@ color: purple
 - **工作流程**: `docs/workflows/extract_rewrite_workflow.md` - AI协作开发工作流
 - **Git规范**: `docs/standards/git_commit_std.md` - Git提交规范
 - **文档模板**:
-  - `docs/templates/research/literature_review_template.md` - 文献综述模板
-  - `docs/templates/research/feasibility_analysis_template.md` - 可行性分析模板
-  - `docs/templates/research/recommendations_template.md` - 技术建议模板
+  - `docs/research/literature_review_template.md` - 文献综述模板
+  - `docs/research/feasibility_analysis_template.md` - 可行性分析模板
+  - `docs/research/recommendations_template.md` - 技术建议模板
 - **知识管理**:
-  - `docs/knowledge/best_practices/research_methods.md` - 研究方法最佳实践
   - `docs/knowledge/best_practices/tech_solutions.md` - 技术方案库
 
 ## 质量标准

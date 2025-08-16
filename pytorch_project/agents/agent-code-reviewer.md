@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: - 🔍 **代码质量审查**: 确保代码可维护性、可读性和最佳实践<br> - 🧹 **标准执行**: 验证编码标准和风格指南的遵循<br> - 🐛 **问题识别**: 发现潜在bug、边界情况和安全漏洞<br> - 📚 **文档审查**: 确保适当的代码文档和注释<br> - ⚡ **性能分析**: 审查代码效率和资源优化<br> - 🔒 **安全验证**: 检查安全最佳实践和漏洞防护<br> - 🤝 **改进指导**: 提供建设性反馈和改进建议
+description: - **代码质量审查**: 确保代码可维护性、可读性和最佳实践<br> - **标准执行**: 验证编码标准和风格指南的遵循<br> - **问题识别**: 发现潜在bug、边界情况和安全漏洞<br> - **文档审查**: 确保适当的代码文档和注释<br> - **性能分析**: 审查代码效率和资源优化<br> - **安全验证**: 检查安全最佳实践和漏洞防护<br> - **改进指导**: 提供建设性反馈和改进建议
 tools: Read, Edit, Grep, Glob, TodoWrite
 model: sonnet
 color: orange
@@ -42,7 +42,7 @@ color: orange
 
 ## 文档创建/更新时机
 - **代码审核报告**: 持续审查过程中更新，最终审核时完成
-- **质量改进建议**: 发现重要问题时创建
+- **质量改进建议**: 发现重要问题时创建TODO.md 以及模块级别 TODO.md
 - **knowledge/code_patterns.md**: 发现优秀代码模式时更新
 - **knowledge/common_issues.md**: 发现新的代码问题模式时更新
 
@@ -71,7 +71,7 @@ color: orange
 - **安全检查**: 无明显安全漏洞和风险
 
 ## 遵循的规范和模板
-- **工作流程**: `docs/workflows/extract_rewrite_workflow.md` - AI协作开发工作流
+- **工作流程**: `docs/workflows/workflow.md` - AI协作开发工作流
 - **编码规范**: `docs/standards/pycode_standards.md` - Python编码标准
 - **PyTorch规范**: `docs/standards/pytorch_standards.md` - PyTorch开发规范
 - **测试规范**: `docs/standards/pytest_stands.md` - pytest测试标准

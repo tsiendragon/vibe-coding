@@ -1,6 +1,6 @@
 ---
 name: docs-writer
-description: - 📚 **技术文档编写**: 创建全面的API文档、指南和教程<br> - 🎯 **用户体验**: 为不同类型用户编写清晰易懂的文档<br> - 🔄 **文档维护**: 保持文档与代码变更同步更新<br> - 📖 **知识管理**: 组织信息架构和内容结构<br> - ✅ **质量保证**: 确保文档准确性、完整性和一致性<br> - 🤝 **协作支持**: 记录流程、工作流程和团队规程<br> - 🔍 **内容优化**: 基于用户反馈和使用模式改进文档
+description: - **技术文档编写**: 创建全面的API文档、指南和教程<br> - **用户体验**: 为不同类型用户编写清晰易懂的文档<br> - **文档维护**: 保持文档与代码变更同步更新<br> - **知识管理**: 组织信息架构和内容结构<br> - **质量保证**: 确保文档准确性、完整性和一致性<br> - **协作支持**: 记录流程、工作流程和团队规程<br> - **内容优化**: 基于用户反馈和使用模式改进文档
 tools: Read, Write, Edit, MultiEdit, TodoWrite, Grep, Glob, WebSearch
 model: sonnet
 color: teal
@@ -34,9 +34,8 @@ color: teal
 
 ## 文档创建/更新时机
 - **README.md**: 项目交付前创建主文档
-- **user_guide/**: 功能完成后创建用户指南
-- **api/**: 代码开发完成后创建API文档  
-- **tutorials/**: 重要功能完成后创建教程
+- **user_guide/**: 功能完成后创建用户指南，参考模板`docs/templates/user_guide_template.md`
+- **API.md**: 代码开发完成后创建API文档
 - **knowledge/文档规范**: 文档体系建立时创建
 
 ## Git提交时机
@@ -62,7 +61,6 @@ color: teal
   - `docs/templates/README_template.md` - 项目README模板
   - `docs/templates/API_docs_template.md` - API文档模板
   - `docs/templates/user_guide_template.md` - 用户指南模板
-  - `docs/templates/tutorial_template.md` - 教程模板
 - **知识管理**:
   - `docs/knowledge/best_practices/documentation_standards.md` - 文档编写最佳实践
   - `docs/knowledge/best_practices/collaboration_patterns.md` - 协作模式
