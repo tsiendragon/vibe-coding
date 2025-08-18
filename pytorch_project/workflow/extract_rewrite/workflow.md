@@ -184,7 +184,7 @@ flowchart LR
 ### 客户需求确认与PRD起草阶段
 
 #### 阶段1: 客户需求收集与澄清
-**负责**: agent-product-manager  
+**负责**: agent-product-manager
 **时机**: 项目启动，收到初始需求后
 
 **需求输入方式**:
@@ -221,7 +221,7 @@ flowchart TD
 
 **需求澄清检查清单**:
 - [ ] **功能需求**: 每个功能的具体定义、输入输出、边界条件
-- [ ] **性能需求**: 准确率、延迟、吞吐量、资源使用等量化指标  
+- [ ] **性能需求**: 准确率、延迟、吞吐量、资源使用等量化指标
 - [ ] **数据需求**: 训练数据、测试数据的格式、规模、获取方式
 - [ ] **环境约束**: 部署环境、硬件限制、集成要求
 - [ ] **优先级**: P0(必须)、P1(重要)、P2(可选)功能分级
@@ -271,15 +271,178 @@ flowchart TD
    - **Commit类型**: `docs(tech-spec): add initial technical specification draft`
 
 2. **调研与可行性（RESEARCH）**
-   agent-researcher 根据`PRD` 和 `TECH_SPEC` 搜索各种资源，例如 paper
-   agent-researcher 对资源进行搜索，通过深度调研和分析，确保项目：
+   agent-researcher 按照Ilya Sutskever式的深度研究方法，进行多阶段递归调研：
+
+   ### 阶段1: 初始调研与资源收集
+   **具体操作**:
+   ```bash
+   # 多源资源搜索策略
+   1. ArXiv搜索: "model_name" + "architecture"
+   2. Google Scholar: 查找引用最多的相关论文
+   3. GitHub搜索: "model_name" + "pytorch" + "implementation"
+   4. 技术博客: Medium, Towards Data Science, Distill.pub
+   5. 中文资源: 知乎、CSDN、机器之心
+   ```
+
+   **工作量标准**:
+   - [ ] 收集至少15篇核心论文(包括原始论文、改进论文、综述)
+   - [ ] 找到至少3个不同的代码实现(官方+社区)
+   - [ ] 收集至少10篇高质量技术博客解析
+   - [ ] 建立资源清单并按质量分级
+
+   **创建文档**: `docs/research/resource_inventory.md`
+
+   **资源质量评估与分类**:
+   - **A级资源**: 原始论文、顶会论文、官方实现
+   - **B级资源**: 知名机构博客、高质量复现、详细解析
+   - **C级资源**: 个人博客、简单介绍、部分实现
+
+   ### 阶段2: 概念预理解与盲点识别
+   **具体操作**:
+   1. 快速浏览所有A级资源，提取关键概念
+   2. 列出所有专业术语和技术概念
+   3. 标记理解程度: 完全理解/部分理解/完全不懂
+
+   **创建文档**: `docs/research/concept_inventory.md`
+   **概念依赖关系分析**: 识别概念间的依赖关系，确定学习顺序
+
+   ### 阶段3: 深度迭代研究
+
+   #### 概念深度学习循环
+   **单个概念的研究流程**:
+   ```
+   选择概念 → 搜索资料 → 理论学习 → 代码验证 → 理解检验 → 文档更新
+   ```
+
+   **概念理解判断标准**:
+   - [ ] **定义清晰**: 能准确描述概念的数学定义
+   - [ ] **直觉理解**: 能用类比或可视化解释概念
+   - [ ] **公式推导**: 能推导关键数学公式
+   - [ ] **代码对应**: 理解理论与实现的对应关系
+   - [ ] **应用场景**: 知道概念在模型中的具体作用
+
+   **是否需要创建概念知识库的判断标准**:
+   ```
+   创建知识库 if (
+       概念复杂度 > 中等 AND
+       (概念频繁出现 OR 概念是核心创新点 OR 概念理解困难)
+   )
+   ```
+
+   #### 模块架构递归分析
+   **整体到局部的分解策略**:
+   ```
+   Level 0: 整个模型 (如Flux)
+   ├─ Level 1: 主要组件 (Encoder, Decoder, 中间处理)
+   │  ├─ Level 2: 子模块 (Attention Block, MLP, Norm Layer)
+   │  │  ├─ Level 3: 基础操作 (MatMul, Softmax, LayerNorm)
+   │  │  └─ Level 3: 具体实现细节
+   ```
+
+   **模块是否需要进一步拆分的判断标准**:
+   ```
+   继续拆分 if (
+       模块内部逻辑复杂 OR
+       包含多个不同功能 OR
+       某个子部分是创新点 OR
+       理解不够透彻
+   )
+   ```
+
+   **模块理解透彻的判断标准**:
+   - [ ] **功能清晰**: 能准确描述模块的作用
+   - [ ] **IO明确**: 清楚输入输出的格式和含义
+   - [ ] **内部透明**: 理解内部每个操作的目的
+   - [ ] **参数理解**: 知道每个参数的作用和设置原理
+   - [ ] **代码对应**: 能将理论分析与代码实现对应
+   - [ ] **性能影响**: 理解模块对整体性能的影响
+
+   #### 理论与代码验证循环
+   **验证流程**:
+   1. **理论预期**: 基于理论分析，预测代码应该如何实现
+   2. **代码检查**: 实际查看代码实现
+   3. **差异分析**: 对比理论预期与实际实现的差异
+   4. **原因调查**: 理解差异的原因(工程优化、实现限制等)
+   5. **知识更新**: 更新理论理解或发现新的细节
+
+   ### 阶段4: 困难处理策略
+
+   #### 概念始终理解不了的处理方案
+   **问题诊断**:
+   ```
+   理解困难原因诊断:
+   1. 数学基础不足 → 补充基础数学知识
+   2. 概念过于抽象 → 寻找具体例子和类比
+   3. 资料质量差 → 寻找更好的学习资源
+   4. 概念确实复杂 → 寻求专家帮助或暂时搁置
+   ```
+
+   **具体策略**:
+   1. **降维理解**: 先理解简化版本或特殊情况
+   2. **类比学习**: 寻找相似概念进行类比
+   3. **实验验证**: 通过代码实验观察行为
+   4. **社区求助**: 在学术社区提问
+   5. **暂时标记**: 标记为"深度理解待定"，继续其他部分
+
+   **创建困难概念档案**: `docs/research/difficult_concepts.md`
+
+   #### 理解正确性验证方法
+   **多重验证策略**:
+   1. **交叉验证**: 对比多个独立资源的解释
+   2. **代码验证**: 理论预测与代码行为的一致性
+   3. **实验验证**: 通过小实验验证理解
+   4. **专家确认**: 在技术社区寻求确认
+   5. **逻辑自洽**: 检查理解在整个框架内的逻辑一致性
+
+   **理解正确性检查清单**:
+   - [ ] 能否解释观察到的现象?
+   - [ ] 预测是否与实际代码行为一致?
+   - [ ] 是否与已知的理论框架兼容?
+   - [ ] 能否回答"为什么这样设计"的问题?
+
+   ### 最终产出
+   通过深度调研和分析，确保项目：
    1. 技术方案科学: 基于最新研究和最佳实践
    2. 风险可控: 提前识别和规避技术风险
    3. 效率最优: 避免不必要的技术探索和试错成本
    4. 持续改进: 为项目提供持续的技术优化方向
-   生成`/docs/research/feasibility_analysis.md` 和 `/docs/research/recommendations.md` 为agent-tech-lead提供技术方案选择的理论支撑
-   agent-researcher 对资源进行分析理解，生成 `/docs/research/literature_review.md`, 理解每个算法，代码实现的原理，提取公式，构建流程图，完善理论理解。
-   完善`TECH_SPEC.md`中的 ·`Source Inventory` 章节
+
+   **生成文档**:
+   - `docs/research/literature_review.md`: 深度理论理解，提取公式，构建流程图
+   - `docs/research/feasibility_analysis.md`: 技术可行性分析
+   - `docs/research/recommendations.md`: 技术建议和优化方向
+   - 完善`TECH_SPEC.md`中的 `Source Inventory` 章节
+
+   **完整文档结构**:
+   ```
+   docs/research/
+   ├── overview.md                    # 研究总览和核心发现
+   ├── resource_inventory.md          # 资源清单和质量评估
+   ├── concept_inventory.md           # 概念清单和理解状态
+   ├── research_log.md               # 详细研究日志
+   ├── architecture/                 # 架构分析
+   │   ├── overall_design.md         # 整体架构设计
+   │   ├── encoder_analysis.md       # 编码器分析
+   │   ├── decoder_analysis.md       # 解码器分析
+   │   ├── innovation_analysis.md    # 创新点分析
+   │   └── dataflow_analysis.md      # 数据流分析
+   ├── concepts/                     # 概念知识库
+   │   ├── [concept_name].md         # 各个核心概念详细解析
+   │   └── difficult_concepts.md     # 困难概念处理
+   ├── implementations/              # 代码实现分析
+   │   ├── official_analysis.md      # 官方实现分析
+   │   ├── community_comparison.md   # 社区实现对比
+   │   └── key_functions.md          # 关键函数解析
+   ├── validation/                   # 验证与实验
+   │   ├── theory_code_mapping.md    # 理论代码对应
+   │   ├── experiment_results.md     # 实验验证结果
+   │   └── consistency_check.md      # 一致性检查
+   └── insights/                     # 深度洞察
+       ├── innovation_summary.md     # 创新点总结
+       ├── agi_relevance.md          # AGI相关性分析
+       ├── comparison_with_gpt.md    # 与GPT系列对比
+       └── future_directions.md      # 未来发展方向
+   ```
 
    **🔄 Git Commit判断**:
    - **Commit条件**: 完成所有调研文档(literature_review.md, feasibility_analysis.md, recommendations.md)
