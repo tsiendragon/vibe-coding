@@ -1,0 +1,1 @@
+根据题号 $id 与评分规约 $rubric，读取 answers/short_q$id.md，按维度（如“概念准确性、清晰度、深度与广度、实践相关性、逻辑与例证”）打分并计算总体分，生成评分 JSON写入 $score_file。

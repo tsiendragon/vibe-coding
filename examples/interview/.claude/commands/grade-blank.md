@@ -1,0 +1,1 @@
+根据题号 $id，读取可接受答案集合 keys/blank_q$id.txt（|| 分隔，大小写不敏感）与作答 answers/blank_q$id.md，匹配其一即为正确，生成评分 JSON并写入 $score_file。

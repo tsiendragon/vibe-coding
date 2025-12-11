@@ -1,0 +1,1 @@
+根据题号 $id，读取标准答案 keys/mcq_q$id.txt 与作答 answers/mcq_q$id.md，判定是否正确，生成评分 JSON并写入 $score_file（字段含 type,id,key,answer,correct,score）。

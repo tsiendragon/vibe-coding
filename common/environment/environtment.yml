@@ -1,0 +1,42 @@
+name: clmf
+channels:
+  - conda-forge     # 精简通道，避免解到老版本
+dependencies:
+  - python=3.12.*
+  - pip
+  - setuptools
+  - wheel
+  - numpy
+  - scipy
+  - ffmpeg
+
+  - pip:
+      # 先装 torch/vision（指定官方索引，按需二选一）
+      - torch --index-url https://download.pytorch.org/whl/cu121        # Linux+NVIDIA CUDA12.1
+      # - torch --index-url https://download.pytorch.org/whl/cu128       # 如果你用 CUDA12.8
+      - torchvision --index-url https://download.pytorch.org/whl/cu121
+      # - torchvision --index-url https://download.pytorch.org/whl/cu128
+      # - torch --index-url https://download.pytorch.org/whl/cpu         # macOS/CPU可选
+      # - torchvision --index-url https://download.pytorch.org/whl/cpu
+      # 其余包（顺序保持）
+      - kagglehub
+      - torch-geometric
+      - timm
+      - accelerate
+      - wandb
+      - python-dotenv
+      - requests
+      - pytest
+      - pytest-mock
+      - rich
+      - jaxtyping  # advanced typing for pytorch
+      - omegaconf  # parse config
+      - opencv-python-headless==4.10.*  # image processing
+      - scikit-learn  # calculate metrics
+      - matplotlib  # plot figures
+      - seaborn  # plot figures
+      - pandas  # data processing
+      - tqdm  # progress bar
+      - tabulate  # print tables
+      - einops  # tensor operations
+      - efficientnet-pytorch  # a network

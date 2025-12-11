@@ -1,0 +1,1 @@
+根据题型 $type（mcq|blank|short）与题号 $id，接收用户答案 $answer，将其写入文件 $afile 的第一行（MCQ 为 A|B|C|D 单字母；Blank 为文本；Short 为自由文本）。

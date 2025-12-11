@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+"""
+Development Assistant using Claude CLI
+A practical script for common development tasks.
+"""
+
+import argparse
+import sys
+import os
+from pathlib import Path
+from claude_cli_wrapper import ClaudeCLI
+import subprocess
+
+
+def code_review(file_path: str):
+    """Review a code file for issues and improvements."""
+    if not os.path.exists(file_path):
+        print(f"❌ File not found: {file_path}")
+        return
+    
+    with open(file_path, 'r') as f:
+        code = f.read()
+    
+    cli = ClaudeCLI()
+    result = cli.prompt(f"""
+Review this code file ({file_path}) and provide:
+1. 🐛 Potential bugs or issues
+2. ⚡ Performance improvements  
+3. 📝 Code style suggestions
+4. 🔒 Security concerns
+5. ✅ Overall rating (1-10)
+
+```{Path(file_path).suffix[1:] if Path(file_path).suffix else 'text'}
+{code}
+```
+""", output_format="text", max_turns=2)
+    
+    if "result" in result:
+        print("📋 Code Review Results:")
+        print("=" * 50)
+        print(result["result"])
+    else:
+        print(f"❌ Error during review: {result}")
+
+
+def generate_commit_message():
+    """Generate a commit message from git diff."""
+    # Check if we're in a git repo
+    if not os.path.exists('.git'):
+        print("❌ Not in a git repository")
+        return
+    
+    # Get staged changes
+    diff_result = subprocess.run(
+        ["git", "diff", "--cached"],
+        capture_output=True,
+        text=True
+    )
+    
+    if not diff_result.stdout:
+        # Try unstaged changes if no staged changes
+        diff_result = subprocess.run(
+            ["git", "diff"],
+            capture_output=True,
+            text=True
+        )
+    
+    if not diff_result.stdout:
+        print("❌ No changes detected")
+        return
+    
+    cli = ClaudeCLI()
+    result = cli.prompt(f"""
+Based on these git changes, write a concise commit message following conventional commit format:
+- Format: type(scope): description
+- Types: feat, fix, docs, style, refactor, test, chore
+- Keep under 72 characters for the first line
+- Add body if needed for complex changes
+
+Git diff:
+{diff_result.stdout[:2000]}  # Limit diff size
+""", output_format="text", max_turns=2)
+    
+    if "result" in result:
+        commit_msg = result["result"].strip()
+        print("💡 Suggested commit message:")
+        print("=" * 50)
+        print(commit_msg)
+        
+        # Ask if user wants to use it
+        response = input("\n🤔 Use this commit message? (y/N): ")
+        if response.lower() in ['y', 'yes']:
+            # Create commit
+            commit_result = subprocess.run(
+                ["git", "commit", "-m", commit_msg],
+                capture_output=True,
+                text=True
+            )
+            if commit_result.returncode == 0:
+                print("✅ Committed successfully!")
+            else:
+                print(f"❌ Commit failed: {commit_result.stderr}")
+    else:
+        print(f"❌ Error generating commit message: {result}")
+
+
+def explain_error(error_text: str):
+    """Explain an error message and provide solutions."""
+    cli = ClaudeCLI()
+    result = cli.prompt(f"""
+Explain this error and provide step-by-step solutions:
+
+Error: {error_text}
+
+Please provide:
+1. 🔍 What causes this error
+2. 🛠️ Step-by-step solution
+3. 🚫 How to prevent it in the future
+4. 📚 Related documentation links if applicable
+""", output_format="text", max_turns=2)
+    
+    if "result" in result:
+        print("🔍 Error Analysis:")
+        print("=" * 50)
+        print(result["result"])
+    else:
+        print(f"❌ Error during analysis: {result}")
+
+
+def refactor_code(file_path: str):
+    """Get refactoring suggestions for a code file."""
+    if not os.path.exists(file_path):
+        print(f"❌ File not found: {file_path}")
+        return
+    
+    with open(file_path, 'r') as f:
+        code = f.read()
+    
+    file_ext = Path(file_path).suffix[1:] if Path(file_path).suffix else 'text'
+    
+    cli = ClaudeCLI()
+    result = cli.prompt(f"""
+Refactor this {file_ext} code for better:
+- 📖 Readability
+- ⚡ Performance  
+- 🔧 Maintainability
+- 🏗️ Best practices
+
+Original code ({file_path}):
+```{file_ext}
+{code}
+```
+
+Provide:
+1. ✨ Refactored code
+2. 📝 Explanation of changes
+3. ❓ Why each change improves the code
+""", output_format="text", max_turns=2)
+    
+    if "result" in result:
+        print("🔄 Refactoring Suggestions:")
+        print("=" * 50)
+        print(result["result"])
+        
+        # Ask if user wants to save refactored version
+        response = input(f"\n💾 Save refactored version to {file_path}.refactored? (y/N): ")
+        if response.lower() in ['y', 'yes']:
+            # Extract refactored code (basic implementation)
+            refactored_content = result["result"]
+            with open(f"{file_path}.refactored", 'w') as f:
+                f.write(f"# Refactored version of {file_path}\n")
+                f.write(f"# Generated by Claude CLI\n\n")
+                f.write(refactored_content)
+            print(f"✅ Saved to {file_path}.refactored")
+    else:
+        print(f"❌ Error during refactoring: {result}")
+
+
+def ask_question(question: str):
+    """Ask a general programming question."""
+    cli = ClaudeCLI()
+    result = cli.prompt(question, output_format="text", max_turns=2, allow=["WebSearch"])
+    
+    if "result" in result:
+        print("🤖 Claude's Answer:")
+        print("=" * 50)
+        print(result["result"])
+    else:
+        print(f"❌ Error: {result}")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Development Assistant using Claude CLI",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s review src/main.py          # Review a code file
+  %(prog)s commit                      # Generate commit message
+  %(prog)s error "ModuleNotFoundError" # Explain an error
+  %(prog)s refactor utils.py           # Get refactoring suggestions
+  %(prog)s ask "How to use decorators" # Ask a programming question
+"""
+    )
+    
+    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    
+    # Code review command
+    review_parser = subparsers.add_parser('review', help='Review code file')
+    review_parser.add_argument('file', help='Path to code file')
+    
+    # Commit message command
+    commit_parser = subparsers.add_parser('commit', help='Generate git commit message')
+    
+    # Error explanation command
+    error_parser = subparsers.add_parser('error', help='Explain error message')
+    error_parser.add_argument('message', help='Error message to explain')
+    
+    # Refactoring command
+    refactor_parser = subparsers.add_parser('refactor', help='Get refactoring suggestions')
+    refactor_parser.add_argument('file', help='Path to code file')
+    
+    # Ask question command
+    ask_parser = subparsers.add_parser('ask', help='Ask programming question')
+    ask_parser.add_argument('question', help='Your question')
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return
+    
+    print(f"🚀 Claude Development Assistant")
+    print(f"Command: {args.command}")
+    print("-" * 30)
+    
+    try:
+        if args.command == 'review':
+            code_review(args.file)
+        elif args.command == 'commit':
+            generate_commit_message()
+        elif args.command == 'error':
+            explain_error(args.message)
+        elif args.command == 'refactor':
+            refactor_code(args.file)
+        elif args.command == 'ask':
+            ask_question(args.question)
+        else:
+            print(f"❌ Unknown command: {args.command}")
+            
+    except KeyboardInterrupt:
+        print("\n👋 Goodbye!")
+    except Exception as e:
+        print(f"❌ Unexpected error: {e}")
+
+
+if __name__ == "__main__":
+    main()

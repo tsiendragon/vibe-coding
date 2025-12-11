@@ -1,0 +1,1 @@
+根据主题 $theme , 观众 $audience,  和转折次数$twists 生成一个超短故事大纲并写入文件 $file
