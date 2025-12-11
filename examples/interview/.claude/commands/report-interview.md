@@ -1,0 +1,1 @@
+根据主题 $topic 与评分规约 $rubric，汇总 questions/、answers/、scores/ 的全部产物，计算总体成绩与通过情况，生成总报告写入 $report_file

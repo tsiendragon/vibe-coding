@@ -1,0 +1,245 @@
+apiVersion: wop/v0.3
+kind: Workflow
+metadata: { name: interview-mixed, version: 0.3.0 }
+
+# —— 运行参数：控制题型与数量、主题与评分规约
+params:
+  topic: "machine learning basics"
+  n_mcq: 3            # 选择题数量
+  n_blank: 2          # 填空题数量
+  n_short: 2          # 简答题数量
+  rubric: |           # 简答题评分 Rubric（可在 /wop.start 时整体覆盖）
+    维度:
+      - 概念准确性(0-5)
+      - 结构清晰度(0-5)
+      - 深度与广度(0-5)
+      - 实践相关性(0-5)
+      - 逻辑与例证(0-5)
+    评分规则:
+      - 每题按维度给分，再给总体分
+      - 简答题单题总分 = 维度均值 * 20（百分制）
+    建议:
+      - 输出优点/待改进Top-3与后续学习建议（含资料/练习方向）
+
+# —— 统一注册表：@规范 / @命令 / @工具（演示用）
+refs:
+  standards:
+    - id: std.interview.min
+      name: "面试流程最小规范"
+      uri: ".claude/standards/interview.md"
+      enforce:
+        when: ["s_mcq_loop","s_blank_loop","s_short_loop","s_report"]
+        checks:
+          - type: tool
+            tool: "@bash.echo"
+            args:
+              - "✅ 标准检查：题面清晰、答案记录成功、评分产物存在（演示用）"
+
+  commands:
+    # —— 出题命令（按“位置参数”风格，符合你的示例签名习惯）
+    - id: cmd.ask_mcq
+      agent: interviewer
+      mode: chat
+      signature: "/ask-mcq  ${topic}  ${id}  questions/mcq_q${id}.md  keys/mcq_q${id}.txt"
+      outputs:
+        files:
+          - "questions/mcq_q${id}.md"     # 题干 + 选项A-D
+          - "keys/mcq_q${id}.txt"         # 正确选项（单字母）
+
+    - id: cmd.ask_blank
+      agent: interviewer
+      mode: chat
+      signature: "/ask-blank  ${topic}  ${id}  questions/blank_q${id}.md  keys/blank_q${id}.txt"
+      outputs:
+        files:
+          - "questions/blank_q${id}.md"   # 题干，空位用「____」
+          - "keys/blank_q${id}.txt"       # 可接受答案（用 '||' 分隔）
+
+    - id: cmd.ask_short
+      agent: interviewer
+      mode: chat
+      signature: "/ask-short  ${topic}  ${id}  questions/short_q${id}.md"
+      outputs: { files: ["questions/short_q${id}.md"] }
+
+    # —— 记录答案（把 Gate 的评论写入 answers/）
+    - id: cmd.record
+      agent: recorder
+      mode: chat
+      signature: "/record  ${type}  ${id}  ${answer}  answers/${type}_q${id}.md"
+      outputs: { files: ["answers/${type}_q${id}.md"] }
+
+    # —— 评分命令
+    - id: cmd.grade_mcq
+      agent: evaluator
+      mode: shell
+      signature: "/grade-mcq  ${id}  scores/mcq_q${id}.json"
+      outputs: { files: ["scores/mcq_q${id}.json"] }
+
+    - id: cmd.grade_blank
+      agent: evaluator
+      mode: shell
+      signature: "/grade-blank  ${id}  scores/blank_q${id}.json"
+      outputs: { files: ["scores/blank_q${id}.json"] }
+
+    - id: cmd.grade_short
+      agent: evaluator
+      mode: chat
+      signature: "/grade-short  ${id}  ${rubric}  scores/short_q${id}.json"
+      outputs: { files: ["scores/short_q${id}.json"] }
+
+    # —— 汇总报告
+    - id: cmd.report_interview
+      agent: evaluator
+      mode: chat
+      signature: "/report-interview  ${topic}  ${rubric}  reports/interview_report.md"
+      outputs:
+        files:
+          - "reports/interview_report.md"
+
+  tools:
+    - id: bash.echo
+      kind: shell
+      entry: "bash -lc 'echo [STD] $0 $1 $2 $3'"
+
+artifacts:
+  report_md: "reports/interview_report.md"
+  score_json: "artifacts/score.json"
+
+agents:
+  - { id: 主agent,      role: HostAgent }
+  - { id: interviewer,  role: InterviewerAgent }
+  - { id: recorder,     role: RecorderAgent }
+  - { id: evaluator,    role: EvaluatorAgent }
+
+stages:
+  - id: kickoff
+    name: "确认主题"
+    steps: [ s_params, s_confirm ]
+  - id: qa_mcq
+    name: "选择题"
+    steps: [ s_mcq_loop ]
+  - id: qa_blank
+    name: "填空题"
+    steps: [ s_blank_loop ]
+  - id: qa_short
+    name: "简答题"
+    steps: [ s_short_loop ]
+  - id: wrap
+    name: "汇总评分"
+    steps: [ s_report, compose ]
+
+steps:
+  # 0) 确定参数
+  - id: s_params
+    name: "确定参数"
+    agent: 主agent
+    run: { type: chat, command: "依次询问用户 topic / n_mcq / n_blank / n_short，并写入到 interview/params.json 中；缺失则沿用默认 params。" }
+    next: [ s_confirm ]
+
+  # 1) 主题确认（人审 Gate）
+  - id: s_confirm
+    name: "确认面试主题(人审Gate)"
+    agent: 主agent
+    run: { type: chat, command: "请用户确认当前主题：${params.topic}；将出选择题${params.n_mcq}、填空题${params.n_blank}、简答题${params.n_short}。" }
+    gates:
+      - type: approval
+        id: g_topic_ok
+        approvers: [ "用户" ]
+        prompt: "是否接受该面试主题与题量配置？（yes/no，可在评论补充范围）"
+    next:
+      - id: s_mcq_loop
+        when: "g_topic_ok == 'yes'"
+      - id: s_params
+        when: "g_topic_ok == 'no'"
+
+  # 2) 选择题循环（1..n_mcq）
+  - id: s_mcq_loop
+    name: "选择题循环"
+    agent: interviewer
+    use: { standards: ["std.interview.min"] }
+    loop:
+      mode: foreach
+      generator: { fn: "range", start: 1, end: "${params.n_mcq}" }
+      body:
+        type: composite
+        steps:
+          - { type: command, command: "/ask-mcq  ${params.topic}  ${loop.value}  questions/mcq_q${loop.value}.md  keys/mcq_q${loop.value}.txt" }
+          - type: gate
+            gate:
+              type: approval
+              id: "g_mcq_${loop.value}"
+              approvers: [ "用户" ]
+              prompt: "第 ${loop.value} 题（见 questions/mcq_q${loop.value}.md）：请仅回复选项字母（A/B/C/D）。"
+          - { type: command,
+              command: "/record  mcq  ${loop.value}  ${gate('g_mcq_'+loop.value).comment}  answers/mcq_q${loop.value}.md" }
+          - { type: command, command: "/grade-mcq  ${loop.value}  scores/mcq_q${loop.value}.json" }
+    next: [ s_blank_loop ]
+
+  # 3) 填空题循环（1..n_blank）
+  - id: s_blank_loop
+    name: "填空题循环"
+    agent: interviewer
+    use: { standards: ["std.interview.min"] }
+    loop:
+      mode: foreach
+      generator: { fn: "range", start: 1, end: "${params.n_blank}" }
+      body:
+        type: composite
+        steps:
+          - { type: command, command: "/ask-blank  ${params.topic}  ${loop.value}  questions/blank_q${loop.value}.md  keys/blank_q${loop.value}.txt" }
+          - type: gate
+            gate:
+              type: approval
+              id: "g_blank_${loop.value}"
+              approvers: [ "用户" ]
+              prompt: "第 ${loop.value} 题（见 questions/blank_q${loop.value}.md）：请在评论中填入答案（大小写不敏感）。"
+          - { type: command,
+              command: "/record  blank  ${loop.value}  ${gate('g_blank_'+loop.value).comment}  answers/blank_q${loop.value}.md" }
+          - { type: command, command: "/grade-blank  ${loop.value}  scores/blank_q${loop.value}.json" }
+    next: [ s_short_loop ]
+
+  # 4) 简答题循环（1..n_short）
+  - id: s_short_loop
+    name: "简答题循环"
+    agent: interviewer
+    use: { standards: ["std.interview.min"] }
+    loop:
+      mode: foreach
+      generator: { fn: "range", start: 1, end: "${params.n_short}" }
+      body:
+        type: composite
+        steps:
+          - { type: command, command: "/ask-short  ${params.topic}  ${loop.value}  questions/short_q${loop.value}.md" }
+          - type: gate
+            gate:
+              type: approval
+              id: "g_short_${loop.value}"
+              approvers: [ "用户" ]
+              prompt: "第 ${loop.value} 题（见 questions/short_q${loop.value}.md）：请在评论中作答（要点清晰，案例加分）。"
+          - { type: command,
+              command: "/record  short  ${loop.value}  ${gate('g_short_'+loop.value).comment}  answers/short_q${loop.value}.md" }
+          - { type: command, command: "/grade-short  ${loop.value}  ${params.rubric}  scores/short_q${loop.value}.json" }
+    next: [ s_report ]
+
+  # 5) 汇总评分与建议
+  - id: s_report
+    name: "汇总评分与建议"
+    agent: evaluator
+    use: { standards: ["std.interview.min"] }
+    run:
+      type: command
+      command: "/report-interview  ${params.topic}  ${params.rubric}  reports/interview_report.md"
+    outputs:
+      files:
+        - "${{artifacts.report_md}}"
+        - "${{artifacts.score_json}}"
+        - "artifacts/summary.md"
+        - "artifacts/advice.md"
+
+  # 6) 合成（可选）：把要点汇成一份便于投递的摘要
+  - id: compose
+    name: "合成面试摘要"
+    agent: evaluator
+    run:
+      type: chat
+      command: "根据 @questions/**、@answers/**、@scores/**、@reports/interview_report.md 合成一页摘要，生成 @reports/onepager.md"

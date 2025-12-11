@@ -1,0 +1,168 @@
+apiVersion: wop/v0.3
+kind: Workflow
+metadata: { name: story-mini, version: 0.3.0 }
+
+# —— 运行参数：可用来触发不同故事路径与循环次数
+params:
+  audience: "kids"           # kids | adults
+  theme: "adventure"         # 不同类型故事
+  characters: ["Ava","Ben"]  # foreach 演示
+  twists: 2                  # while-until 演示：至少生成 2 个转折
+
+# —— 统一注册表：@规范 / @命令 / @工具（本例全部是文本/打印类）
+refs:
+  standards:
+    - id: std.story.format
+      name: "故事文本最小规范"
+      uri: ".claude/standards/story.md"
+      enforce:
+        when: ["s_outline","s_first_arc","s_chars","s_twists","s_final"]
+        checks:
+          - type: tool
+            tool: "@bash.echo"
+            args:
+              - "✅ 标准检查：每段≤120字；结尾需含完整句号（演示用，无实际校验）"
+
+  commands:
+    # 由模型在对话中“写文件”的聊天命令（要求把文本落到指定文件）
+    - id: cmd.outline
+      agent: planner
+      mode: chat
+      signature: "/outline  ${audience}  ${theme}  ${twists}  stories/outline.md"
+      outputs: { files: ["stories/outline.md"] }
+
+    - id: cmd.write
+      agent: writer
+      mode: chat
+      signature: "/write  ${part}  ${outline_file}  ${file}"
+      outputs: { files: ["${file}"] }
+
+artifacts:
+  outline: "stories/outline.md"
+  final:   "stories/final.md"
+
+agents:
+  - { id: planner, role: PlannerAgent }
+  - { id: writer,  role: writerAgent  }
+
+stages:
+  - id: req
+    name: "需求与大纲"
+    steps: [ s_outline, s_confirm ]
+  - id: write
+    name: "创作与分支"
+    steps: [ s_choose_arc, s_first_arc, s_chars, s_twists, s_final ]
+
+steps:
+  # 0) 确定参数
+  - id: s_params
+    name: "确定参数"
+    agent: 主agent
+    run: { type: chat, command: "依次询问用户params的参数，并写入到stories/params.json中" }
+    next: [ s_outline ]
+
+  # 1) 生成大纲
+  - id: s_outline
+    name: "生成故事大纲"
+    agent: planner
+    use: { standards: ["std.outline.format"] }
+    run: { type: command, command: "/outline ${params.audience} ${params.theme} ${params.twists} stories/outline.md" }
+    outputs: { files: ["stories/outline.md"] }
+    next: [ s_confirm ]
+
+  # 2) 人审 Gate：确认大纲
+  - id: s_confirm
+    name: "确认大纲(人审Gate)"
+    agent: 主 agent
+    run: { type: chat, command: "请用户确认请审阅 stories/outline.md 并确认是否可继续" }
+    gates:
+      - type: approval
+        id: g_outline_ok
+        approvers: [ "用户" ]
+        prompt: "是否接受该大纲？"
+    next:
+      - id: s_choose_yes
+        when: "g_outline_ok == 'yes'"
+        next: [ s_choose_arc ]
+      - id: s_choose_no
+        when: "g_outline_ok == 'no'"
+        next: [ s_outline ]
+
+
+  # 3) foreach：为每个角色写一段人物卡
+  - id: s_chars
+    name: "人物卡"
+    agent: writer
+    use: { standards: [] }
+    loop:
+      mode: foreach
+      list: "${params.characters}"
+      as: name
+      body:
+        type: command
+        command: "/write"
+        args:
+          outline_file: "stories/outline.md"
+          part: "char-${loop.name}"
+          notes: 为角色{loop.name}写一段不超过三句的介绍,包括特质/动机/弱点
+          file: "stories/char_${loop.name}.md"
+    next: [ s_first_arc ]
+
+
+
+  # 4) 第一幕（根据上一步条件，设置不同风格/提示）
+  - id: s_first_arc
+    name: "第一幕"
+    agent: writer
+    use: { standards: [".claude/standards/outline.md"] }
+    run:
+      type: command
+      command: "/write"
+      args:
+        outline_file: "stories/outline.md"
+        part: "act1"
+        notes: "基于大纲，用3-5句完成第一幕, 介绍背景，出场人物，并设置一个悬念。"
+        file: "stories/act1.md"
+    outputs: { files: ["stories/act1.md"] }
+    next: [ s_twists ]
+
+  # 5) while-until：加入若干“反转”，直到达到 twists 次
+  - id: s_twists
+    name: "剧情反转"
+    agent: writer
+    use: { standards: [".claude/standards/story.md"] }
+    loop:
+      mode: while
+      until: "loop.iter >= params.twists"
+      body:
+        type: command
+        command: "/write"
+        args:
+          outline_file: "stories/outline.md"
+          part: "twist-${loop.iter}"
+          notes: "追加一个合理的反转（第 ${loop.iter} 次），保持简短有趣。"
+          file: "stories/twist_${loop.iter}.md"
+    next: [ s_final ]
+
+  # 6) 结尾：汇总并收尾
+  - id: s_final
+    name: "收尾与发布"
+    agent: writer
+    use: { standards: [".claude/standards/story.md"] }
+    run:
+      type: command
+      command: "/write"
+      args:
+        outline_file: "stories/outline.md"
+        part: "final"
+        notes: "参考大纲与前述片段，写一个收尾段落，以 'THE END.' 结尾。"
+        file: "stories/final.md"
+    outputs: { files: ["stories/final.md"] }
+
+  - id: compose
+    name: "合成故事"
+    agent: writer
+    use: { standards: [".claude/standards/story.md"] }
+    run:
+      type: command
+      command: "根据 @stories/outline.md, @stories/act*.md, @stories/twist_*.md, @stories/final.md 合成一个完整的故事. 生成 @stories/story.md"

@@ -1,0 +1,2 @@
+- 严格根据这个工作@.claude/workflow/workflow.yaml， 完成故事生成的任务。并根据工作流中指定,调用相应的 sub-agent，以及运行相应的命令
+- 如果还没有定义 params 的参数，从开始询问

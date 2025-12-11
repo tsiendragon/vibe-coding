@@ -1,0 +1,1 @@
+根据大纲 $outline, 生成章节 $part 的具体内容, $note, 写入到文件 $file 中.

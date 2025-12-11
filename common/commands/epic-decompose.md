@@ -1,0 +1,1 @@
+读取 $PRD 和 $USE_REQ (也可以不提供)，随后确定性地将工作拆分为 Epic → Story → Task，并按 @template 的模板严格生成格式良好的文档。完成拆分后，执行 git commit 提交本次拆分成果

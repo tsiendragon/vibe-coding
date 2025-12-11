@@ -1,0 +1,2 @@
+- 严格根据这个工作@.claude/workflow/workflow.yaml， 进行 interview 的过程中根据工作流中指定,调用相应的 sub-agent，以及运行相应的命令
+- 从开始询问用户要 interview 的话题开始。如果用户的话题不清晰，反复询问，直到清晰

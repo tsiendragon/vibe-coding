@@ -1,0 +1,81 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(cp:*)",
+      "Bash(ls:*)",
+      "Bash(pwd:*)",
+      "Bash(cd:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(git-commit:*)",
+      "Bash(git-pull:*)",
+      "Bash(git-status:*)",
+      "Bash(git-add:*)",
+      "Bash(git-branch:*)",
+      "Bash(git-checkout:*)",
+      "Bash(git-merge:*)",
+      "Bash(git-rebase:*)",
+      "Bash(git-reset:*)",
+      "Bash(git-stash:*)",
+      "Bash(git-tag:*)",
+      "WebSearch"
+    ],
+    "ask": [
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(git-push:*)"
+    ],
+    "defaultMode": "default"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "say 'Claude has finished'"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "say 'Performing web search'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "say 'Please review the edit'"
+          }
+        ]
+      },
+      {
+        "matcher": "MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "say 'Please review the edits'"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "say 'Please review the file write'"
+          }
+        ]
+      }
+    ]
+  }
+}
